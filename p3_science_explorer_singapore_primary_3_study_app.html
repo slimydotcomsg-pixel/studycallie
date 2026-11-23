@@ -1,0 +1,2419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>P3 Science Explorer — Singapore Primary 3 Study App</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Kid-friendly, highly legible Google Fonts: Fredoka (headings) & Nunito (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Fredoka', 'sans-serif'],
+            sans: ['Nunito', 'sans-serif'],
+          },
+          colors: {
+            cream: '#FFFDF7',
+            skysoft: '#EBF8FF',
+            mintsoft: '#ECFDF5',
+            sunsoft: '#FEFCE8',
+            coralsoft: '#FFF1F2',
+            lavsoft: '#F5F3FF',
+          },
+          boxShadow: {
+            card: '0 8px 24px -6px rgba(15, 23, 42, 0.08)',
+            chunky: '0 4px 0 0 rgba(15, 23, 42, 0.12)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Base typography & smooth background */
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: #FFFDF7;
+      background-image:
+        radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.10) 0%, transparent 32%),
+        radial-gradient(circle at 88% 12%, rgba(250, 204, 21, 0.14) 0%, transparent 30%),
+        radial-gradient(circle at 80% 85%, rgba(52, 211, 153, 0.10) 0%, transparent 35%);
+      color: #1E293B;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    /* Tactile chunky button feel for kids */
+    .btn-chunky {
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+    }
+    .btn-chunky:hover {
+      transform: translateY(-2px);
+    }
+    .btn-chunky:active {
+      transform: translateY(2px);
+    }
+
+    /* Animations */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    .animate-float {
+      animation: floatSlow 3.4s ease-in-out infinite;
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.92) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .animate-pop {
+      animation: popIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes starBounce {
+      0%, 100% { transform: scale(1); }
+      40% { transform: scale(1.35) rotate(-8deg); }
+      70% { transform: scale(0.95) rotate(6deg); }
+    }
+    .star-pop {
+      animation: starBounce 0.55s ease;
+    }
+
+    /* Confetti canvas overlay */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Hide scrollbar on horizontal nav tabs on mobile */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Confetti Canvas for Celebrations -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Toast Notification (replaces alert()) -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ========================================================= -->
+  <!-- TOP PERSISTENT NAVIGATION BAR                             -->
+  <!-- ========================================================= -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b-2 border-amber-100 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand Logo -->
+      <button onclick="switchTab('home')" class="flex items-center gap-2.5 text-left group focus:outline-none">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+          <!-- Cute inline SVG beaker icon -->
+          <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+          </svg>
+        </div>
+        <div>
+          <span class="font-display font-bold text-lg sm:text-xl text-slate-800 block leading-tight">P3 Science Explorer</span>
+          <span class="text-xs font-bold text-sky-600 tracking-wide">Singapore MOE Syllabus 🇸🇬</span>
+        </div>
+      </button>
+
+      <!-- Star Counter & Scientist Rank Badge -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Rank Badge -->
+        <div id="rank-badge" class="flex items-center gap-1.5 bg-purple-50 border-2 border-purple-200 text-purple-800 px-3 py-1.5 rounded-2xl text-xs sm:text-sm font-bold shadow-sm">
+          <span id="rank-emoji">🌱</span>
+          <span id="rank-title">Curious Cadet</span>
+        </div>
+
+        <!-- Star Counter -->
+        <div id="star-pill" class="flex items-center gap-1.5 bg-amber-100 border-2 border-amber-300 text-amber-900 px-3.5 py-1.5 rounded-2xl text-sm sm:text-base font-extrabold shadow-sm">
+          <span id="star-icon" class="text-lg leading-none">⭐</span>
+          <span id="star-count">0</span>
+          <span class="text-xs font-bold text-amber-700 hidden sm:inline">Stars</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Navigation Tabs -->
+    <nav class="max-w-6xl mx-auto px-4 pb-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <button data-tab="home" onclick="switchTab('home')" class="nav-btn btn-chunky shrink-0 px-4 py-2 rounded-2xl font-display font-semibold text-sm sm:text-base flex items-center gap-1.5 border-2 transition-all">
+        🏠 <span>Heads-Up</span>
+      </button>
+      <button data-tab="slides" onclick="switchTab('slides')" class="nav-btn btn-chunky shrink-0 px-4 py-2 rounded-2xl font-display font-semibold text-sm sm:text-base flex items-center gap-1.5 border-2 transition-all">
+        📽️ <span>Slide Studio</span>
+      </button>
+      <button data-tab="lab" onclick="switchTab('lab')" class="nav-btn btn-chunky shrink-0 px-4 py-2 rounded-2xl font-display font-semibold text-sm sm:text-base flex items-center gap-1.5 border-2 transition-all">
+        🧪 <span>Experiment Lab</span>
+      </button>
+      <button data-tab="quiz" onclick="switchTab('quiz')" class="nav-btn btn-chunky shrink-0 px-4 py-2 rounded-2xl font-display font-semibold text-sm sm:text-base flex items-center gap-1.5 border-2 transition-all">
+        🎯 <span>Quiz Arena</span>
+      </button>
+      <button data-tab="notes" onclick="switchTab('notes')" class="nav-btn btn-chunky shrink-0 px-4 py-2 rounded-2xl font-display font-semibold text-sm sm:text-base flex items-center gap-1.5 border-2 transition-all">
+        📚 <span>Notes Vault</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- MAIN CONTENT AREA                                         -->
+  <!-- ========================================================= -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 sm:py-8">
+
+    <!-- ======================================================= -->
+    <!-- SECTION 1: HOME / P3 HEADS-UP                           -->
+    <!-- ======================================================= -->
+    <section id="tab-home" class="tab-section space-y-8 animate-pop">
+      <!-- Welcome Hero Banner -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 text-white p-6 sm:p-10 shadow-card">
+        <div class="relative z-10 max-w-3xl">
+          <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3.5 py-1 rounded-full text-xs sm:text-sm font-bold mb-4">
+            <span>🎉 Welcome to Primary 3 Science!</span>
+          </div>
+          <h1 class="font-display text-3xl sm:text-5xl font-bold leading-tight mb-3">
+            Welcome, Junior Scientist! 🔬
+          </h1>
+          <p class="text-sky-50 text-base sm:text-lg font-semibold leading-relaxed mb-6">
+            Guess what? Science isn't just memorizing big words — it's about being a <span class="underline decoration-amber-300 decoration-4 underline-offset-4 font-extrabold text-white">super observant detective</span>! You'll ask "Why?", group amazing living things, test cool materials, and run fair experiments just like a real scientist.
+          </p>
+          <!-- Quick Launch Buttons -->
+          <div class="flex flex-wrap gap-3">
+            <button onclick="openSlideTopic('animals')" class="btn-chunky bg-amber-400 hover:bg-amber-300 text-slate-900 font-display font-bold px-5 py-3 rounded-2xl shadow-chunky flex items-center gap-2 text-sm sm:text-base">
+              🦁 Start Topic 1: Animals
+            </button>
+            <button onclick="openSlideTopic('materials')" class="btn-chunky bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-display font-bold px-5 py-3 rounded-2xl shadow-chunky flex items-center gap-2 text-sm sm:text-base">
+              🧱 Start Topic 2: Materials
+            </button>
+            <button onclick="switchTab('lab')" class="btn-chunky bg-white hover:bg-sky-50 text-indigo-700 font-display font-bold px-5 py-3 rounded-2xl shadow-chunky flex items-center gap-2 text-sm sm:text-base">
+              🧪 Fair Test Lab
+            </button>
+          </div>
+        </div>
+        <!-- Decorative floating icons -->
+        <div class="hidden md:flex flex-col items-center gap-3 absolute right-8 top-1/2 -translate-y-1/2 text-6xl select-none animate-float opacity-95">
+          <span>🦋</span>
+          <span class="text-5xl">🧲</span>
+          <span class="text-5xl">🌱</span>
+        </div>
+      </div>
+
+      <!-- What to Expect in P3 Science (Heads-Up Tips) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-amber-50 border-2 border-amber-200 rounded-3xl p-5 shadow-sm">
+          <div class="text-3xl mb-2">🔍</div>
+          <h3 class="font-display font-bold text-lg text-amber-900 mb-1">1. Observe & Classify</h3>
+          <p class="text-sm text-amber-900/80 font-semibold leading-relaxed">
+            In P3, you will sort living things into groups (like Mammals vs Reptiles) by looking closely at their body coverings, how they breathe, and how they reproduce!
+          </p>
+        </div>
+        <div class="bg-emerald-50 border-2 border-emerald-200 rounded-3xl p-5 shadow-sm">
+          <div class="text-3xl mb-2">💬</div>
+          <h3 class="font-display font-bold text-lg text-emerald-900 mb-1">2. Use Science Keywords</h3>
+          <p class="text-sm text-emerald-900/80 font-semibold leading-relaxed">
+            Teachers love clear Science words! Instead of "we can see through glass", say <span class="bg-emerald-200/70 px-1.5 rounded font-extrabold">"allows most light to pass through"</span>.
+          </p>
+        </div>
+        <div class="bg-rose-50 border-2 border-rose-200 rounded-3xl p-5 shadow-sm">
+          <div class="text-3xl mb-2">⚖️</div>
+          <h3 class="font-display font-bold text-lg text-rose-900 mb-1">3. Play Fair in Experiments</h3>
+          <p class="text-sm text-rose-900/80 font-semibold leading-relaxed">
+            A good scientist only changes <strong>ONE</strong> thing at a time! Everything else must stay the same so the test is fair. Try our Experiment Lab to practice!
+          </p>
+        </div>
+      </div>
+
+      <!-- Visual P3 MOE Syllabus Roadmap -->
+      <div>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <h2 class="font-display text-2xl sm:text-3xl font-bold text-slate-800">🗺️ Your P3 Science Roadmap</h2>
+          <span class="text-xs sm:text-sm font-bold bg-sky-100 text-sky-800 px-3 py-1 rounded-full">Click any card to explore!</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Theme 1: Diversity -->
+          <div class="bg-white border-2 border-sky-200 rounded-3xl p-6 shadow-card relative overflow-hidden">
+            <div class="flex items-center justify-between mb-3">
+              <span class="bg-sky-100 text-sky-800 font-display font-bold text-xs uppercase tracking-wider px-3 py-1 rounded-full">Theme 1 • Term 1 & 2</span>
+              <span class="bg-amber-400 text-slate-900 font-bold text-xs px-2.5 py-1 rounded-full">⭐ Start Here!</span>
+            </div>
+            <h3 class="font-display text-2xl font-bold text-slate-800 mb-2">🌍 Diversity</h3>
+            <p class="text-sm text-slate-600 font-semibold mb-4">Discover the amazing variety of living things and materials around us!</p>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="openSlideTopic('living')" class="btn-chunky bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-900 font-bold text-xs sm:text-sm px-3 py-2 rounded-xl">🍄 Living Things & 4 Groups</button>
+              <button onclick="openSlideTopic('animals')" class="btn-chunky bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold text-xs sm:text-sm px-3 py-2 rounded-xl">🦁 Animals (6 Groups)</button>
+              <button onclick="openSlideTopic('materials')" class="btn-chunky bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 font-bold text-xs sm:text-sm px-3 py-2 rounded-xl">🧱 Materials & Properties</button>
+            </div>
+          </div>
+
+          <!-- Theme 2: Cycles -->
+          <div class="bg-white border-2 border-emerald-200 rounded-3xl p-6 shadow-card">
+            <div class="flex items-center justify-between mb-3">
+              <span class="bg-emerald-100 text-emerald-800 font-display font-bold text-xs uppercase tracking-wider px-3 py-1 rounded-full">Theme 2 • Term 3</span>
+              <span class="text-2xl">🔄</span>
+            </div>
+            <h3 class="font-display text-2xl font-bold text-slate-800 mb-2">🦋 Cycles</h3>
+            <p class="text-sm text-slate-600 font-semibold mb-4">See how animals and plants grow, change stages, and start new life!</p>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="openSlideTopic('lifecycles')" class="btn-chunky bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 font-bold text-xs sm:text-sm px-3 py-2 rounded-xl">🐛 3-Stage vs 4-Stage Animals</button>
+              <button onclick="openSlideTopic('lifecycles')" class="btn-chunky bg-lime-50 hover:bg-lime-100 border border-lime-200 text-lime-900 font-bold text-xs sm:text-sm px-3 py-2 rounded-xl">🌱 Plant Life Cycle</button>
+            </div>
+          </div>
+
+          <!-- Theme 3: Interactions -->
+          <div class="bg-white border-2 border-purple-200 rounded-3xl p-6 shadow-card">
+            <div class="flex items-center justify-between mb-3">
+              <span class="bg-purple-100 text-purple-800 font-display font-bold text-xs uppercase tracking-wider px-3 py-1 rounded-full">Theme 3 • Term 4</span>
+              <span class="text-2xl">🧲</span>
+            </div>
+            <h3 class="font-display text-2xl font-bold text-slate-800 mb-2">⚡ Interactions (Magnets)</h3>
+            <p class="text-sm text-slate-600 font-semibold mb-4">Explore invisible pushes and pulls, magnetic metals, and poles!</p>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="openSlideTopic('magnets')" class="btn-chunky bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-900 font-bold text-xs sm:text-sm px-3 py-2 rounded-xl">🧲 Magnetic Materials & Poles</button>
+              <button onclick="openQuizTopic('lifecycles_magnets')" class="btn-chunky bg-fuchsia-50 hover:bg-fuchsia-100 border border-fuchsia-200 text-fuchsia-900 font-bold text-xs sm:text-sm px-3 py-2 rounded-xl">🎯 Try Magnets Quiz</button>
+            </div>
+          </div>
+
+          <!-- Bonus Lab: Fair Test Experiments -->
+          <div class="bg-gradient-to-br from-rose-50 to-orange-50 border-2 border-rose-200 rounded-3xl p-6 shadow-card">
+            <div class="flex items-center justify-between mb-3">
+              <span class="bg-rose-200 text-rose-900 font-display font-bold text-xs uppercase tracking-wider px-3 py-1 rounded-full">Bonus Superpower!</span>
+              <span class="text-2xl">🧪</span>
+            </div>
+            <h3 class="font-display text-2xl font-bold text-slate-800 mb-2">🕵️‍♀️ Rules of Fair Test Experiments</h3>
+            <p class="text-sm text-slate-600 font-semibold mb-4">Master Changed, Unchanged, and Measured variables to ace experiment questions!</p>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="switchTab('lab')" class="btn-chunky bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow-sm">🎮 Play Experiment Detective</button>
+              <button onclick="openSlideTopic('fairtest')" class="btn-chunky bg-white hover:bg-rose-100 border border-rose-200 text-rose-900 font-bold text-xs sm:text-sm px-3 py-2 rounded-xl">📽️ Fair Test Slides</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- SECTION 2: INTERACTIVE SLIDE STUDIO                     -->
+    <!-- ======================================================= -->
+    <section id="tab-slides" class="tab-section hidden space-y-6 animate-pop">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+        <div>
+          <h2 class="font-display text-3xl font-bold text-slate-800">📽️ Slide Studio</h2>
+          <p class="text-slate-600 font-semibold">Click any topic button below to instantly generate an interactive slide deck!</p>
+        </div>
+        <div class="text-sm font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3.5 py-1.5 rounded-2xl self-start">
+          Decks Completed: <span id="decks-completed-count">0</span> / 6
+        </div>
+      </div>
+
+      <!-- Topic Generator Buttons -->
+      <div id="slide-topic-buttons" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <!-- Populated dynamically by JS -->
+      </div>
+
+      <!-- Slide Viewer Stage -->
+      <div id="slide-viewer" class="bg-white border-2 border-slate-200 rounded-3xl p-5 sm:p-8 shadow-card">
+        <!-- Header & Progress -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="flex items-center gap-2">
+            <span id="slide-deck-badge" class="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800">Animals</span>
+            <span id="slide-counter" class="text-sm font-bold text-slate-500">Slide 1 of 6</span>
+          </div>
+          <!-- Progress Dots -->
+          <div id="slide-dots" class="flex items-center gap-1.5"></div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mb-6">
+          <div id="slide-progress-bar" class="h-full bg-gradient-to-r from-sky-400 to-indigo-500 rounded-full transition-all duration-300" style="width: 16%;"></div>
+        </div>
+
+        <!-- Dynamic Slide Content Area -->
+        <div id="slide-content-area" class="min-h-[320px] flex flex-col justify-between gap-6">
+          <!-- Filled by JS -->
+        </div>
+
+        <!-- Navigation Footer -->
+        <div class="mt-8 pt-5 border-t-2 border-slate-100 flex flex-wrap items-center justify-between gap-3">
+          <button id="btn-prev-slide" onclick="changeSlide(-1)" class="btn-chunky px-5 py-2.5 rounded-2xl font-display font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border-2 border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed">
+            ⬅️ Previous
+          </button>
+
+          <div class="flex items-center gap-3">
+            <button id="btn-complete-deck" onclick="completeCurrentDeck()" class="hidden btn-chunky px-5 py-2.5 rounded-2xl font-display font-bold text-slate-900 bg-amber-400 hover:bg-amber-300 border-2 border-amber-500 shadow-chunky">
+              ⭐ Mark Deck Complete (+10 Stars)
+            </button>
+            <button id="btn-next-slide" onclick="changeSlide(1)" class="btn-chunky px-6 py-2.5 rounded-2xl font-display font-bold text-white bg-sky-500 hover:bg-sky-600 border-2 border-sky-600 shadow-chunky">
+              Next Slide ➡️
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- SECTION 3: FAIR TEST EXPERIMENT LAB                     -->
+    <!-- ======================================================= -->
+    <section id="tab-lab" class="tab-section hidden space-y-6 animate-pop">
+      <div class="bg-gradient-to-r from-rose-500 via-orange-400 to-amber-400 text-white rounded-3xl p-6 sm:p-8 shadow-card">
+        <h2 class="font-display text-3xl sm:text-4xl font-bold mb-2">🧪 Experiment Detective Lab</h2>
+        <p class="text-white/95 font-semibold text-base sm:text-lg max-w-3xl">
+          Every great scientist follows the <strong>Fair Test Rules</strong>! Learn the 3 secret variables below, then test your detective skills in our 2 interactive mini-games.
+        </p>
+      </div>
+
+      <!-- The 3 Variables Visual Explainer -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-sky-50 border-2 border-sky-300 rounded-3xl p-5 shadow-sm">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="w-11 h-11 rounded-2xl bg-sky-500 text-white text-2xl flex items-center justify-center shadow-sm">🔄</span>
+            <div>
+              <h3 class="font-display font-bold text-lg text-sky-950">Changed Variable</h3>
+              <span class="text-xs font-extrabold uppercase text-sky-600">Only ONE thing!</span>
+            </div>
+          </div>
+          <p class="text-sm text-sky-900/90 font-semibold leading-relaxed">
+            The <strong>1 single thing</strong> you deliberately change to test. <br/>
+            <span class="inline-block mt-1 bg-white px-2 py-0.5 rounded-lg border border-sky-200 text-xs">Example: Type of material (Wood vs Plastic)</span>
+          </p>
+        </div>
+
+        <div class="bg-amber-50 border-2 border-amber-300 rounded-3xl p-5 shadow-sm">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="w-11 h-11 rounded-2xl bg-amber-400 text-slate-900 text-2xl flex items-center justify-center shadow-sm">🔒</span>
+            <div>
+              <h3 class="font-display font-bold text-lg text-amber-950">Unchanged Variables</h3>
+              <span class="text-xs font-extrabold uppercase text-amber-700">Kept the SAME!</span>
+            </div>
+          </div>
+          <p class="text-sm text-amber-900/90 font-semibold leading-relaxed">
+            Everything else must stay <strong>identical</strong> so the test is fair! <br/>
+            <span class="inline-block mt-1 bg-white px-2 py-0.5 rounded-lg border border-amber-200 text-xs">Example: Same length, same thickness, same weights</span>
+          </p>
+        </div>
+
+        <div class="bg-emerald-50 border-2 border-emerald-300 rounded-3xl p-5 shadow-sm">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="w-11 h-11 rounded-2xl bg-emerald-500 text-white text-2xl flex items-center justify-center shadow-sm">📏</span>
+            <div>
+              <h3 class="font-display font-bold text-lg text-emerald-950">Measured Variable</h3>
+              <span class="text-xs font-extrabold uppercase text-emerald-700">The Result!</span>
+            </div>
+          </div>
+          <p class="text-sm text-emerald-900/90 font-semibold leading-relaxed">
+            What you <strong>observe or measure</strong> at the end to get your answer! <br/>
+            <span class="inline-block mt-1 bg-white px-2 py-0.5 rounded-lg border border-emerald-200 text-xs">Example: Number of weights before the ruler breaks</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Mini-Game Mode Switcher -->
+      <div class="flex flex-wrap gap-3">
+        <button id="lab-mode-fix" onclick="setLabMode('fix')" class="btn-chunky px-5 py-3 rounded-2xl font-display font-bold text-sm sm:text-base border-2 transition-all">
+          🚨 Game 1: Spot & Fix the Unfair Test!
+        </button>
+        <button id="lab-mode-sort" onclick="setLabMode('sort')" class="btn-chunky px-5 py-3 rounded-2xl font-display font-bold text-sm sm:text-base border-2 transition-all">
+          🧩 Game 2: Variable Sorter Challenge!
+        </button>
+      </div>
+
+      <!-- Lab Interactive Container -->
+      <div id="lab-game-container" class="bg-white border-2 border-slate-200 rounded-3xl p-5 sm:p-8 shadow-card">
+        <!-- Populated dynamically by JS -->
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- SECTION 4: QUIZ ARENA                                   -->
+    <!-- ======================================================= -->
+    <section id="tab-quiz" class="tab-section hidden space-y-6 animate-pop">
+      <div>
+        <h2 class="font-display text-3xl font-bold text-slate-800">🎯 Quiz Arena</h2>
+        <p class="text-slate-600 font-semibold">Pick a topic to generate a fresh MOE P3 Science quiz! Earn ⭐ Stars for every right answer.</p>
+      </div>
+
+      <!-- Topic Quiz Generator Buttons -->
+      <div id="quiz-topic-buttons" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <!-- Populated dynamically by JS -->
+      </div>
+
+      <!-- Quiz Stage -->
+      <div id="quiz-stage" class="bg-white border-2 border-slate-200 rounded-3xl p-5 sm:p-8 shadow-card">
+        <!-- Populated dynamically by JS -->
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- SECTION 5: TOPIC SUMMARIES VAULT (CHEAT SHEET NOTES)    -->
+    <!-- ======================================================= -->
+    <section id="tab-notes" class="tab-section hidden space-y-6 animate-pop">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+        <div>
+          <h2 class="font-display text-3xl font-bold text-slate-800">📚 Cheat Sheet Notes Vault</h2>
+          <p class="text-slate-600 font-semibold">Quick summaries, comparison tables, and golden MOE Science keywords stored in one place!</p>
+        </div>
+      </div>
+
+      <!-- Filter Pills -->
+      <div id="notes-filter-bar" class="flex flex-wrap gap-2">
+        <!-- Populated dynamically by JS -->
+      </div>
+
+      <!-- Summary Cards Container -->
+      <div id="notes-container" class="space-y-5">
+        <!-- Populated dynamically by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Friendly Footer -->
+  <footer class="mt-10 py-6 border-t-2 border-amber-100 bg-white/70 text-center text-xs sm:text-sm text-slate-500 font-semibold">
+    Made with 💛 for Junior Scientists in Singapore • Aligned with MOE Primary 3 Science Syllabus
+  </footer>
+
+  <!-- ========================================================= -->
+  <!-- COMPLETE SELF-CONTAINED JAVASCRIPT APPLICATION            -->
+  <!-- ========================================================= -->
+  <script>
+    /* ===========================================================
+       1. APP STATE & PERSISTENCE (Stars, Rank, Completed Items)
+       =========================================================== */
+    const appState = {
+      stars: 0,
+      completedDecks: [],
+      completedLabGames: [],
+      currentTab: 'home',
+      currentSlideTopic: 'animals',
+      currentSlideIndex: 0,
+      labMode: 'fix',
+      labFixIndex: 0,
+      labFixSolved: {},
+      labSortIndex: 0,
+      labSortAnswers: {},
+      quizActive: false,
+      quizTopic: 'animals',
+      quizQuestions: [],
+      quizIndex: 0,
+      quizScore: 0,
+      quizAnswered: false,
+      notesFilter: 'all'
+    };
+
+    // Safely load saved progress from localStorage
+    function loadProgress() {
+      try {
+        const saved = localStorage.getItem('p3_science_explorer_v1');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          appState.stars = Number(parsed.stars) || 0;
+          appState.completedDecks = Array.isArray(parsed.completedDecks) ? parsed.completedDecks : [];
+          appState.completedLabGames = Array.isArray(parsed.completedLabGames) ? parsed.completedLabGames : [];
+        }
+      } catch (e) {
+        // Fallback cleanly if storage is unavailable
+      }
+      updateStarUI(false);
+    }
+
+    function saveProgress() {
+      try {
+        localStorage.setItem('p3_science_explorer_v1', JSON.stringify({
+          stars: appState.stars,
+          completedDecks: appState.completedDecks,
+          completedLabGames: appState.completedLabGames
+        }));
+      } catch (e) {
+        // Ignore storage quota / iframe restrictions
+      }
+    }
+
+    // Add stars with playful bounce animation & rank check
+    function addStars(amount, reasonText) {
+      const oldRank = getRank(appState.stars).title;
+      appState.stars += amount;
+      const newRank = getRank(appState.stars);
+      saveProgress();
+      updateStarUI(true);
+
+      if (reasonText) {
+        showToast(`+${amount} ⭐ ${reasonText}`, 'amber');
+      }
+      if (newRank.title !== oldRank) {
+        setTimeout(() => {
+          showToast(`🎉 Rank Up! You are now a ${newRank.emoji} ${newRank.title}!`, 'purple');
+          launchConfetti();
+        }, 450);
+      }
+    }
+
+    function getRank(stars) {
+      if (stars >= 150) return { title: 'Super Scientist', emoji: '🚀' };
+      if (stars >= 80)  return { title: 'Science Detective', emoji: '🕵️‍♀️' };
+      if (stars >= 30)  return { title: 'Lab Explorer', emoji: '🔬' };
+      return { title: 'Curious Cadet', emoji: '🌱' };
+    }
+
+    function updateStarUI(animate) {
+      const starCountEl = document.getElementById('star-count');
+      const starIconEl = document.getElementById('star-icon');
+      const rankTitleEl = document.getElementById('rank-title');
+      const rankEmojiEl = document.getElementById('rank-emoji');
+      const deckCountEl = document.getElementById('decks-completed-count');
+
+      if (starCountEl) starCountEl.textContent = appState.stars;
+      const rank = getRank(appState.stars);
+      if (rankTitleEl) rankTitleEl.textContent = rank.title;
+      if (rankEmojiEl) rankEmojiEl.textContent = rank.emoji;
+      if (deckCountEl) deckCountEl.textContent = appState.completedDecks.length;
+
+      if (animate && starIconEl) {
+        starIconEl.classList.remove('star-pop');
+        void starIconEl.offsetWidth; // trigger reflow
+        starIconEl.classList.add('star-pop');
+      }
+    }
+
+    // Custom Toast Notification (No alert() used!)
+    function showToast(message, color = 'sky') {
+      const container = document.getElementById('toast-container');
+      const colors = {
+        amber: 'bg-amber-400 text-slate-900 border-amber-500',
+        sky: 'bg-sky-500 text-white border-sky-600',
+        emerald: 'bg-emerald-500 text-white border-emerald-600',
+        purple: 'bg-purple-600 text-white border-purple-700',
+        rose: 'bg-rose-500 text-white border-rose-600'
+      };
+      const toast = document.createElement('div');
+      toast.className = `px-4 py-3 rounded-2xl border-2 font-display font-bold text-sm shadow-lg animate-pop ${colors[color] || colors.sky}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        setTimeout(() => toast.remove(), 320);
+      }, 2800);
+    }
+
+    /* ===========================================================
+       2. CONFETTI CELEBRATION ENGINE (Lightweight Canvas)
+       =========================================================== */
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ['#FACC15', '#38BDF8', '#34D399', '#FB7185', '#A78BFA', '#FB923C'];
+      const particles = [];
+      for (let i = 0; i < 95; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: -20 - Math.random() * 140,
+          w: 7 + Math.random() * 7,
+          h: 5 + Math.random() * 6,
+          vx: (Math.random() - 0.5) * 5,
+          vy: 2.5 + Math.random() * 4.5,
+          rot: Math.random() * 360,
+          vrot: (Math.random() - 0.5) * 10,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1
+        });
+      }
+
+      let frame = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.08; // gravity
+          p.rot += p.vrot;
+          if (frame > 75) p.alpha -= 0.02;
+          if (p.alpha > 0 && p.y < canvas.height + 30) {
+            alive = true;
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, p.alpha);
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rot * Math.PI) / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            ctx.restore();
+          }
+        });
+        frame++;
+        if (alive && frame < 150) {
+          requestAnimationFrame(draw);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+
+    /* ===========================================================
+       3. SLIDE DECKS DATA (Singapore MOE P3 Syllabus)
+       =========================================================== */
+    const slideDecks = {
+      animals: {
+        id: 'animals',
+        title: 'Animals (6 Groups)',
+        emoji: '🦁',
+        badge: 'Start Here! ⭐',
+        color: 'amber',
+        slides: [
+          {
+            icon: '🐾',
+            title: 'Meet the 6 Animal Groups!',
+            subtitle: 'Scientists sort animals into 6 main groups by looking at their body coverings and features.',
+            points: [
+              '<strong>Mammals</strong> (hair or fur) — e.g., Lion, Whale, Bat, Human',
+              '<strong>Birds</strong> (feathers) — e.g., Eagle, Penguin, Ostrich',
+              '<strong>Fish</strong> (scales & fins) — e.g., Goldfish, Shark, Guppy',
+              '<strong>Reptiles</strong> (dry scaly skin) — e.g., Crocodile, Snake, Turtle',
+              '<strong>Amphibians</strong> (moist skin) — e.g., Frog, Toad, Salamander',
+              '<strong>Insects</strong> (6 legs, 3 body parts) — e.g., Ant, Butterfly, Beetle'
+            ],
+            trapTitle: 'Watch Out! Exam Tip!',
+            trapText: 'Never group animals just by where they live! A whale lives in water like a fish, and a bat flies like a bird — but BOTH are Mammals!'
+          },
+          {
+            icon: '🐶',
+            title: 'Mammals — Warm & Furry!',
+            subtitle: 'The only group of animals that have hair or fur on their bodies.',
+            points: [
+              '<strong>Outer Covering:</strong> Hair or fur.',
+              '<strong>Breathing:</strong> Breathe through <strong>lungs</strong>.',
+              '<strong>Reproduction:</strong> Most give birth to live young and feed their young with <strong>milk</strong> (suckle their young).'
+            ],
+            trapTitle: 'Classic P3 Exam Trap! 🦆',
+            trapText: 'The <strong>Platypus</strong> and <strong>Spiny Anteater (Echidna)</strong> are special mammals that <strong>LAY EGGS</strong>! And Whales & Dolphins are mammals that live in water and come up to breathe air with lungs.'
+          },
+          {
+            icon: '🦜',
+            title: 'Birds — Feathered Friends!',
+            subtitle: 'ONLY birds have feathers — no other animal group has them!',
+            points: [
+              '<strong>Outer Covering:</strong> <strong>Feathers</strong> (keep them warm and help most birds fly).',
+              '<strong>Body Parts:</strong> Have a <strong>beak</strong>, 2 wings, and 2 legs.',
+              '<strong>Breathing & Young:</strong> Breathe through <strong>lungs</strong> and lay eggs with <strong>hard shells</strong>.'
+            ],
+            trapTitle: 'Classic P3 Exam Trap! 🐧',
+            trapText: '<strong>Penguins, Ostriches, and Emus</strong> CANNOT fly, yet they are still Birds because they have <strong>feathers</strong> and a beak! Meanwhile, Bats can fly, but they have fur — so Bats are Mammals!'
+          },
+          {
+            icon: '🐠',
+            title: 'Fish — Masters of the Water!',
+            subtitle: 'Fish live in water their entire lives and have special parts for swimming.',
+            points: [
+              '<strong>Outer Covering:</strong> Most have <strong>scales</strong> (slimy scales help them glide smoothly).',
+              '<strong>Movement:</strong> Use <strong>fins</strong> and a tail to swim and balance.',
+              '<strong>Breathing:</strong> Breathe dissolved oxygen in water through <strong>gills</strong>.',
+              '<strong>Reproduction:</strong> Most lay eggs in water.'
+            ],
+            trapTitle: 'Classic P3 Exam Trap! 🦈',
+            trapText: 'Not all fish lay eggs! <strong>Guppies, Mollies, Swordtails, and some Sharks</strong> are fish that <strong>give birth to live young</strong>!'
+          },
+          {
+            icon: '🦎',
+            title: 'Reptiles vs Amphibians!',
+            subtitle: 'Students often mix these two up — look at their SKIN!',
+            points: [
+              '<strong>Reptiles</strong> (Snake, Lizard, Turtle, Crocodile): Have <strong>dry scaly skin</strong>, breathe through <strong>lungs</strong>, and most lay eggs with leathery shells on land.',
+              '<strong>Amphibians</strong> (Frog, Toad, Salamander): Have <strong>moist skin without scales</strong>, live both on land and in water, and lay jelly-like eggs in water.',
+              '<strong>Amphibian Breathing:</strong> Adults breathe through <strong>lungs</strong> on land and through their <strong>moist skin</strong> in water! (Tadpoles use gills.)'
+            ],
+            trapTitle: 'Fun Fact to Remember! 🐸',
+            trapText: 'Think <strong>"A-M"</strong>: <strong>A</strong>mphibians have <strong>M</strong>oist skin! Think <strong>"R-D"</strong>: <strong>R</strong>eptiles have <strong>D</strong>ry scaly skin!'
+          },
+          {
+            icon: '🐞',
+            title: 'Insects — The 6-Legged Crew!',
+            subtitle: 'Count the legs and body parts to be 100% sure it is an insect.',
+            points: [
+              '<strong>Outer Covering:</strong> Hard outer covering called an <strong>exoskeleton</strong> (supports and protects the body).',
+              '<strong>Body Parts:</strong> Exactly <strong>3 body parts</strong> (Head, Thorax, Abdomen).',
+              '<strong>Legs & Feelers:</strong> Exactly <strong>6 legs (3 pairs)</strong> and <strong>1 pair of feelers (antennae)</strong>.',
+              '<strong>Reproduction:</strong> Lay eggs.'
+            ],
+            trapTitle: 'Biggest P3 Exam Trap! 🕷️',
+            trapText: 'A <strong>Spider is NOT an insect</strong>! Spiders have <strong>8 legs</strong> and only 2 body parts (they are arachnids). Centipedes and worms are NOT insects either!'
+          }
+        ]
+      },
+
+      materials: {
+        id: 'materials',
+        title: 'Materials & Properties',
+        emoji: '🧱',
+        badge: 'Start Here! ⭐',
+        color: 'emerald',
+        slides: [
+          {
+            icon: '🛠️',
+            title: '7 Common Materials Around Us',
+            subtitle: 'Everything we touch is made of one or more materials chosen for a reason!',
+            points: [
+              '<strong>Wood</strong> (from trees) • <strong>Metal</strong> (from rocks/ores) • <strong>Plastic</strong> (man-made from oil)',
+              '<strong>Glass</strong> (from sand) • <strong>Rubber</strong> (from rubber trees) • <strong>Ceramic</strong> (from clay) • <strong>Fabric</strong> (cotton, wool, silk)',
+              'One object can use <strong>different materials</strong> for different parts! Example: A cooking pot has a <strong>metal</strong> body (strong, conducts heat) and a <strong>plastic/wood</strong> handle!'
+            ],
+            trapTitle: 'Smart Thinking Tip! 🧠',
+            trapText: 'Always look at the <strong>PART</strong> of the object the question asks about — e.g., the lens of spectacles (glass/clear plastic) vs the frame (metal/plastic)!'
+          },
+          {
+            icon: '💪',
+            title: 'Property 1 & 2: Strength & Flexibility',
+            subtitle: 'Learn the exact MOE Science definitions for these two!',
+            points: [
+              '<strong>Strength:</strong> The ability of a material to <strong>support a heavy load without breaking or tearing</strong>. (e.g., Metal bridges, wooden tables).',
+              '<strong>Flexibility:</strong> The ability of a material to <strong>bend easily without breaking</strong>. (e.g., Rubber hose, fabric towel, plastic ruler).',
+              'Opposite of flexible is <strong>stiff / rigid</strong> (e.g., glass, ceramic, thick wood).'
+            ],
+            trapTitle: 'Watch Out! Exam Trap! ⚠️',
+            trapText: '<strong>Strong ≠ Hard!</strong> Ceramic plates are hard, but they are NOT strong — drop one and it shatters! Fabric is soft, yet a thick rope is very strong!'
+          },
+          {
+            icon: '💧',
+            title: 'Property 3: Waterproof vs Absorbent',
+            subtitle: 'Does water soak into the material, or roll right off?',
+            points: [
+              '<strong>Waterproof:</strong> Does <strong>NOT absorb water</strong> (water cannot pass through). Examples: Plastic, Glass, Metal, Rubber.',
+              '<strong>Absorbent:</strong> <strong>Absorbs water</strong> easily. Examples: Cotton fabric, Paper, Sponge.',
+              '<strong>Uses:</strong> Raincoats & umbrellas must be <strong>waterproof</strong>; bath towels & mops must be <strong>absorbent</strong>!'
+            ],
+            trapTitle: 'MOE Keyword Alert! ✨',
+            trapText: 'In exams, instead of saying "water won\'t go inside", write: <strong>"It is waterproof / does not absorb water, so it keeps the user dry."</strong>'
+          },
+          {
+            icon: '🪟',
+            title: 'Property 4: Transparency (Light!)',
+            subtitle: 'How much light can pass through a material?',
+            points: [
+              '<strong>Transparent:</strong> Allows <strong>most light</strong> to pass through clearly (e.g., clear glass, clear plastic). Great for windows & fish tanks!',
+              '<strong>Translucent:</strong> Allows <strong>some light</strong> to pass through (looks blurry, e.g., frosted glass, tracing paper). Great for bathroom windows!',
+              '<strong>Opaque:</strong> Allows <strong>no light</strong> to pass through (e.g., wood, metal, ceramic). Great for bedroom doors!'
+            ],
+            trapTitle: 'MOE Keyword Alert! 💡',
+            trapText: 'Don\'t just say "so we can see through it"! Say: <strong>"Glass allows most light to pass through so we can see clearly through the window."</strong>'
+          },
+          {
+            icon: '⛵',
+            title: 'Property 5: Ability to Float or Sink',
+            subtitle: 'Will the material stay on top of water or drop to the bottom?',
+            points: [
+              '<strong>Floats on water:</strong> Wood, most plastics, cork, rubber balls (great for kickboards and life vests!).',
+              '<strong>Sinks in water:</strong> Most metals, glass marbles, ceramic tiles, rocks (great for anchors!).',
+              '<strong>Combining Properties:</strong> A swimming kickboard needs to be <strong>waterproof</strong> AND <strong>able to float on water</strong>!'
+            ],
+            trapTitle: 'Exam Answer Formula! 🏆',
+            trapText: 'When choosing a material in an exam, always state: <strong>(1) The Property</strong> + <strong>(2) Why it helps the job</strong>! E.g., "Plastic is waterproof and light, so the raincoat keeps Ali dry and is easy to wear."'
+          }
+        ]
+      },
+
+      living: {
+        id: 'living',
+        title: 'Living Things & Groups',
+        emoji: '🍄',
+        badge: 'Diversity',
+        color: 'sky',
+        slides: [
+          {
+            icon: '🌱',
+            title: 'Living vs Non-Living Things',
+            subtitle: 'How do we prove something is ALIVE? Check these 5 superpowers!',
+            points: [
+              'Needs <strong>air, food, and water</strong> to survive.',
+              'Can <strong>grow</strong> (becomes bigger, taller, or heavier).',
+              '<strong>Responds to changes</strong> around it (e.g., mimosa plant closes leaves when touched; we pull away from hot things).',
+              'Can <strong>reproduce</strong> (make more of its own kind so it won\'t go extinct).',
+              'Eventually <strong>dies</strong>.'
+            ],
+            trapTitle: 'Classic P3 Exam Trap! 🤖',
+            trapText: 'A toy robot or car can MOVE, and a balloon can GROW bigger when blown — but they are <strong>NON-LIVING</strong> because they do NOT need air, food, and water, and cannot reproduce!'
+          },
+          {
+            icon: '🌿',
+            title: 'The 4 Broad Groups of Living Things',
+            subtitle: 'All living things on Earth can be sorted into 4 big groups!',
+            points: [
+              '<strong>1. Plants:</strong> Make their own food using sunlight, water, and air.',
+              '<strong>2. Animals:</strong> Move from place to place to find food.',
+              '<strong>3. Fungi:</strong> Mushrooms, mould, yeast, toadstools.',
+              '<strong>4. Bacteria:</strong> Tiny living things seen only with a microscope!'
+            ],
+            trapTitle: 'Super Important Fact! 🍄',
+            trapText: '<strong>Fungi are NOT Plants!</strong> Even though mushrooms grow on soil or logs, they have no green leaves and <strong>CANNOT make their own food</strong>!'
+          },
+          {
+            icon: '🌺',
+            title: 'Flowering vs Non-Flowering Plants',
+            subtitle: 'Plants are split into two groups based on whether they produce flowers.',
+            points: [
+              '<strong>Flowering Plants:</strong> Produce flowers → flowers become <strong>fruits with seeds</strong> → reproduce by <strong>seeds</strong> (e.g., Hibiscus, Rose, Mango tree, Grass).',
+              '<strong>Non-Flowering Plants:</strong> Do NOT produce flowers or fruits! They reproduce by tiny <strong>spores</strong> found under their leaves (e.g., Bird\'s Nest Fern, Moss).'
+            ],
+            trapTitle: 'Watch Out! Exam Trap! 🌾',
+            trapText: 'A plant doesn\'t have to have flowers RIGHT NOW to be a flowering plant! A mango tree only blooms during certain seasons, so it is still a <strong>flowering plant</strong>.'
+          },
+          {
+            icon: '🦠',
+            title: 'Fungi & Bacteria — Tiny Helpers & Spoilers',
+            subtitle: 'They are all around us and need warmth, water, and air to grow!',
+            points: [
+              '<strong>Fungi:</strong> Feed on living or dead things. Reproduce by <strong>spores</strong> (mushrooms, bread mould) or budding (yeast). Yeast helps bread rise!',
+              '<strong>Bacteria:</strong> Microscopic living things. <strong>Useful bacteria</strong> make yoghurt/cheese and help digest food in our tummy. <strong>Harmful bacteria</strong> spoil food and make us sick!'
+            ],
+            trapTitle: 'Experiment Clue! 🍞',
+            trapText: 'Bread grows <strong>mould</strong> fastest in a <strong>warm and moist</strong> place! Toasted dry bread or bread in a cold fridge stays mould-free longer because mould needs water and warmth.'
+          }
+        ]
+      },
+
+      fairtest: {
+        id: 'fairtest',
+        title: 'Fair Test Rules',
+        emoji: '🧪',
+        badge: 'Key Skill!',
+        color: 'rose',
+        slides: [
+          {
+            icon: '⚖️',
+            title: 'What Is a Fair Test?',
+            subtitle: 'Imagine a running race where one kid starts halfway down the track — not fair, right?',
+            points: [
+              'In Science, a <strong>Fair Test</strong> means we only change <strong>ONE variable</strong> at a time.',
+              'Every other condition is kept <strong>exactly the same</strong>.',
+              'Why? So we can be <strong>100% sure</strong> that our results were caused ONLY by the one thing we tested!'
+            ],
+            trapTitle: 'Golden Science Rule! 🌟',
+            trapText: 'If you change TWO things at once (like using a thicker wood ruler AND a shorter plastic ruler), your test is <strong>UNFAIR</strong> and you cannot trust the result!'
+          },
+          {
+            icon: '🔄',
+            title: 'Rule 1: The Changed Variable',
+            subtitle: 'Ask yourself: "What is the ONE thing I am comparing?"',
+            points: [
+              'This is the <strong>only variable that is different</strong> between Setup A and Setup B.',
+              'Example 1: Testing which material is strongest → Changed Variable = <strong>Type of material</strong>.',
+              'Example 2: Testing if plants need sunlight → Changed Variable = <strong>Presence of sunlight</strong>.'
+            ],
+            trapTitle: 'Detective Shortcut! 🕵️‍♀️',
+            trapText: 'Read the aim of the experiment! "To find out if the <u>type of cloth</u> affects how much water it absorbs" → The underlined part is ALWAYS your <strong>Changed Variable</strong>!'
+          },
+          {
+            icon: '🔒',
+            title: 'Rule 2: The Unchanged Variables',
+            subtitle: 'Lock everything else down so it stays identical!',
+            points: [
+              'Also called <strong>Variables Kept the Same</strong>.',
+              'Example (Testing cloth absorbency): Keep the <strong>size of cloth</strong>, <strong>thickness of cloth</strong>, <strong>amount of water</strong>, and <strong>time soaked</strong> the SAME!',
+              'If one cloth is huge and the other is tiny, the huge one will soak up more water even if the material isn\'t better!'
+            ],
+            trapTitle: 'Exam Answer Tip! ✍️',
+            trapText: 'When an exam asks "Why did she use strips of the same length and thickness?", answer: <strong>"To ensure a fair test."</strong>'
+          },
+          {
+            icon: '📏',
+            title: 'Rule 3: The Measured Variable',
+            subtitle: 'Ask yourself: "What am I counting or measuring to find the winner?"',
+            points: [
+              'This is the <strong>result</strong> you observe or measure at the end.',
+              'Example (Testing strength): <strong>Number of 100g weights</strong> hung before the strip breaks.',
+              'Example (Testing magnets): <strong>Number of steel paperclips</strong> attracted by each magnet.'
+            ],
+            trapTitle: 'Bonus Skill: Reliability! 🔁',
+            trapText: 'Why do scientists repeat an experiment <strong>3 times</strong> and take the average? To make the results <strong>more reliable</strong> (avoiding lucky accidents)!'
+          }
+        ]
+      },
+
+      lifecycles: {
+        id: 'lifecycles',
+        title: 'Life Cycles',
+        emoji: '🦋',
+        badge: 'Cycles',
+        color: 'purple',
+        slides: [
+          {
+            icon: '🔄',
+            title: 'What Is a Life Cycle?',
+            subtitle: 'A life cycle shows the stages a living thing goes through as it grows and reproduces.',
+            points: [
+              'A cycle repeats over and over so living things ensure the <strong>continuity of their own kind</strong> (so they don\'t go extinct!).',
+              'In P3, we study <strong>3-Stage</strong> and <strong>4-Stage</strong> animal life cycles, plus the <strong>3-Stage Plant</strong> life cycle!'
+            ],
+            trapTitle: 'Remember This Phrase! 💡',
+            trapText: 'Why do living things reproduce? MOE loves the phrase: <strong>"To ensure the continuity of their own kind."</strong>'
+          },
+          {
+            icon: '🐣',
+            title: '3-Stage Animal Life Cycle',
+            subtitle: 'Egg → Young → Adult',
+            points: [
+              '<strong>Young looks like the Adult:</strong> Chicken, Cockroach (nymph), Grasshopper (nymph).',
+              '<strong>Young does NOT look like the Adult:</strong> Frog! (Tadpole has a tail and gills, lives in water; adult frog has legs and lungs!).',
+              '<strong>Moulting:</strong> Cockroach & grasshopper nymphs shed their hard outer covering (moult) several times to grow bigger!'
+            ],
+            trapTitle: 'Watch Out! Exam Trap! 🪳',
+            trapText: 'A cockroach nymph looks like a mini adult cockroach, EXCEPT it has <strong>no wings</strong> and is smaller!'
+          },
+          {
+            icon: '🦋',
+            title: '4-Stage Animal Life Cycle',
+            subtitle: 'Egg → Larva → Pupa → Adult',
+            points: [
+              'Examples: <strong>Butterfly</strong>, <strong>Mosquito</strong>, <strong>Mealworm (Darkling Beetle)</strong>.',
+              '<strong>Larva stage</strong> (caterpillar, wriggler, mealworm): Eats a LOT, grows quickly, and <strong>moults</strong> several times!',
+              '<strong>Pupa stage:</strong> Does NOT eat and barely moves — inside the pupal case, it transforms into an adult!'
+            ],
+            trapTitle: 'Singapore Real-Life Science! 🦟',
+            trapText: 'Mosquito eggs, larvae (wrigglers), and pupae live in <strong>stagnant water</strong>! Spraying oil on water stops larvae from breathing, and emptying flower pots breaks the cycle!'
+          },
+          {
+            icon: '🌻',
+            title: '3-Stage Plant Life Cycle',
+            subtitle: 'Seed → Young Plant (Seedling) → Adult Plant',
+            points: [
+              '<strong>Germination:</strong> A seed needs <strong>Water, Air (Oxygen), and Warmth</strong> to germinate. (It does NOT need sunlight yet!)',
+              '<strong>Seed Leaves:</strong> Provide stored <strong>food</strong> to the growing seedling until its first true green leaves grow!',
+              '<strong>Adult Plant:</strong> Grows flowers → becomes fruits with seeds → cycle repeats!'
+            ],
+            trapTitle: 'Biggest Plant Trap! 🌱',
+            trapText: 'Does a seed need <strong>sunlight</strong> to germinate? <strong>NO!</strong> Seeds can germinate in the dark as long as they have <strong>Water, Air, and Warmth</strong>. Sunlight is only needed once green leaves appear to make food!'
+          }
+        ]
+      },
+
+      magnets: {
+        id: 'magnets',
+        title: 'Magnets',
+        emoji: '🧲',
+        badge: 'Interactions',
+        color: 'indigo',
+        slides: [
+          {
+            icon: '🧲',
+            title: 'Magnetic vs Non-Magnetic Materials',
+            subtitle: 'Not all metals are magnetic! Only 4 special metals are magnetic.',
+            points: [
+              '<strong>Magnetic Materials (ONLY 4!):</strong> <strong>Iron, Steel, Nickel, Cobalt</strong>.',
+              '<strong>Non-Magnetic Metals:</strong> Aluminium, Copper, Gold, Silver, Brass — magnets will NOT attract them!',
+              '<strong>Non-Metals:</strong> Wood, plastic, glass, rubber, fabric are ALL non-magnetic.'
+            ],
+            trapTitle: 'Classic P3 Exam Trap! 🥫',
+            trapText: 'An <strong>aluminium drink can</strong> or a <strong>gold ring</strong> is made of metal, but a magnet will <strong>NOT</strong> attract it! Only Iron, Steel, Nickel, and Cobalt are magnetic.'
+          },
+          {
+            icon: '🧭',
+            title: 'Magnet Poles & Push/Pull Rules',
+            subtitle: 'Every magnet has a North (N) pole and a South (S) pole.',
+            points: [
+              'A magnet\'s pull is <strong>strongest at its poles</strong> (the two ends) and weakest in the middle.',
+              '<strong>Like poles REPEL</strong> (push away): N ↔ N or S ↔ S.',
+              '<strong>Unlike poles ATTRACT</strong> (pull together): N → ← S.',
+              'A freely suspended magnet always comes to rest pointing in the <strong>North-South direction</strong>!'
+            ],
+            trapTitle: 'Golden Rule of Magnets! 🏆',
+            trapText: '<strong>REPULSION is the ONLY sure test</strong> to prove an object is a magnet! Why? Because attraction can happen between a magnet and a plain piece of iron/steel too!'
+          },
+          {
+            icon: '⚡',
+            title: 'Making & Caring for Magnets',
+            subtitle: 'You can turn an iron or steel nail into a temporary magnet!',
+            points: [
+              '<strong>Stroking Method:</strong> Stroke an iron/steel nail with ONE pole of a magnet in the <strong>SAME direction</strong> repeatedly. More strokes = stronger magnet!',
+              '<strong>Electrical Method (Electromagnet):</strong> Coil wire around an iron nail and connect to a battery. More <strong>coils of wire</strong> or more <strong>batteries</strong> = stronger electromagnet!',
+              '<strong>Losing Magnetism:</strong> Dropping, hammering, or heating a magnet makes it lose its magnetism!'
+            ],
+            trapTitle: 'Watch Out! Exam Trap! 🔋',
+            trapText: 'Can you make an electromagnet using a <strong>copper nail</strong> or <strong>plastic rod</strong>? <strong>NO!</strong> Only magnetic materials (iron or steel) can be magnetised!'
+          }
+        ]
+      }
+    };
+
+    /* ===========================================================
+       4. EXPERIMENT DETECTIVE LAB DATA (2 Interactive Mini-Games)
+       =========================================================== */
+    // Game 1: Spot & Fix the Unfair Test!
+    const labFixChallenges = [
+      {
+        id: 'fix1',
+        title: 'Testing Material Strength 💪',
+        aim: 'Mei Ling wants to find out if a WOOD strip or a PLASTIC strip is stronger by hanging weights until they break.',
+        setupA: { label: 'Setup A (Wood)', emoji: '🪵', specs: [
+          { key: 'material', text: 'Material: Wood', isChanged: true },
+          { key: 'length', text: 'Length: 20 cm', unfair: false },
+          { key: 'thickness', text: 'Thickness: 2 cm', unfair: true, fixedText: 'Thickness: 1 cm ✅' }
+        ]},
+        setupB: { label: 'Setup B (Plastic)', emoji: '📏', specs: [
+          { key: 'material', text: 'Material: Plastic', isChanged: true },
+          { key: 'length', text: 'Length: 20 cm', unfair: false },
+          { key: 'thickness', text: 'Thickness: 1 cm', unfair: false }
+        ]},
+        unfairKey: 'thickness',
+        explanation: 'Spot on! The wood strip was THICKER (2 cm) than the plastic strip (1 cm). To make it a fair test, only the MATERIAL should change — the thickness must be kept the SAME!'
+      },
+      {
+        id: 'fix2',
+        title: 'Testing Water Absorption 💧',
+        aim: 'Ravi wants to test whether COTTON cloth or NYLON cloth absorbs more water.',
+        setupA: { label: 'Setup A (Cotton)', emoji: '👕', specs: [
+          { key: 'material', text: 'Cloth: Cotton', isChanged: true },
+          { key: 'size', text: 'Size: 10 cm × 10 cm', unfair: false },
+          { key: 'time', text: 'Soaking Time: 10 seconds', unfair: false }
+        ]},
+        setupB: { label: 'Setup B (Nylon)', emoji: '🧥', specs: [
+          { key: 'material', text: 'Cloth: Nylon', isChanged: true },
+          { key: 'size', text: 'Size: 10 cm × 10 cm', unfair: false },
+          { key: 'time', text: 'Soaking Time: 30 seconds', unfair: true, fixedText: 'Soaking Time: 10 seconds ✅' }
+        ]},
+        unfairKey: 'time',
+        explanation: 'Awesome detective work! Setup B was soaked for 30 seconds while Setup A was only soaked for 10 seconds. Keeping the soaking time the same makes it a fair test!'
+      },
+      {
+        id: 'fix3',
+        title: 'Testing Magnet Strength 🧲',
+        aim: 'Siti wants to find out which magnet (Magnet X or Magnet Y) is stronger by seeing how many steel paperclips it attracts.',
+        setupA: { label: 'Setup A (Magnet X)', emoji: '🧲', specs: [
+          { key: 'magnet', text: 'Magnet: Magnet X', isChanged: true },
+          { key: 'distance', text: 'Distance to clips: 2 cm', unfair: false },
+          { key: 'clips', text: 'Type of clips: Steel', unfair: false }
+        ]},
+        setupB: { label: 'Setup B (Magnet Y)', emoji: '🧲', specs: [
+          { key: 'magnet', text: 'Magnet: Magnet Y', isChanged: true },
+          { key: 'distance', text: 'Distance to clips: 6 cm', unfair: true, fixedText: 'Distance to clips: 2 cm ✅' },
+          { key: 'clips', text: 'Type of clips: Steel', unfair: false }
+        ]},
+        unfairKey: 'distance',
+        explanation: 'Brilliant! Magnet Y was placed much farther away (6 cm vs 2 cm)! Both magnets must be held at the EXACT same distance from the paperclips to test fairly.'
+      },
+      {
+        id: 'fix4',
+        title: 'Does Sunlight Help Plants Grow? 🌱',
+        aim: 'Wei Ming wants to find out if a bean plant needs SUNLIGHT to grow tall.',
+        setupA: { label: 'Pot A (Sunny Window)', emoji: '☀️', specs: [
+          { key: 'light', text: 'Location: Sunny Window', isChanged: true },
+          { key: 'water', text: 'Water daily: 50 ml', unfair: false },
+          { key: 'soil', text: 'Type of soil: Garden soil', unfair: false }
+        ]},
+        setupB: { label: 'Pot B (Dark Cupboard)', emoji: '🌑', specs: [
+          { key: 'light', text: 'Location: Dark Cupboard', isChanged: true },
+          { key: 'water', text: 'Water daily: 100 ml', unfair: true, fixedText: 'Water daily: 50 ml ✅' },
+          { key: 'soil', text: 'Type of soil: Garden soil', unfair: false }
+        ]},
+        unfairKey: 'water',
+        explanation: 'Super sharp eyes! Pot B got 100 ml of water while Pot A only got 50 ml. Only the amount of SUNLIGHT should change — both plants must get the exact same amount of water!'
+      }
+    ];
+
+    // Game 2: Variable Sorter Challenge
+    const labSortChallenges = [
+      {
+        id: 'sort1',
+        title: 'Experiment 1: The Ruler Strength Test 📏',
+        story: 'Pauline hangs 100g weights one by one onto a Wood ruler, a Plastic ruler, and a Metal ruler (all 30 cm long and 0.5 cm thick) until each ruler breaks.',
+        items: [
+          { id: 'i1', text: 'Type of material of the ruler', answer: 'changed' },
+          { id: 'i2', text: 'Length and thickness of the rulers', answer: 'unchanged' },
+          { id: 'i3', text: 'Number of 100g weights before it breaks', answer: 'measured' }
+        ]
+      },
+      {
+        id: 'sort2',
+        title: 'Experiment 2: The Bread Mould Mystery 🍞',
+        story: 'Aisha puts 2 identical slices of bread into sealed bags. She sprinkles 10 drops of water on Slice A, keeps Slice B dry, puts both on the kitchen table, and counts the mould patches after 5 days.',
+        items: [
+          { id: 'i1', text: 'Presence of water on the bread', answer: 'changed' },
+          { id: 'i2', text: 'Type of bread & location on the table', answer: 'unchanged' },
+          { id: 'i3', text: 'Number of mould patches after 5 days', answer: 'measured' }
+        ]
+      },
+      {
+        id: 'sort3',
+        title: 'Experiment 3: Super Electromagnet ⚡',
+        story: 'Daniel coils wire around two identical iron nails using the same type of battery. Nail A has 10 coils of wire, and Nail B has 25 coils of wire. He counts how many steel pins each nail attracts.',
+        items: [
+          { id: 'i1', text: 'Number of coils of wire around the nail', answer: 'changed' },
+          { id: 'i2', text: 'Type of nail and number of batteries', answer: 'unchanged' },
+          { id: 'i3', text: 'Number of steel pins attracted', answer: 'measured' }
+        ]
+      },
+      {
+        id: 'sort4',
+        title: 'Experiment 4: Which Material Lets Light Through? 🔦',
+        story: 'Chloe shines the same torchlight through 3 sheets of the same thickness (Clear Glass, Frosted Plastic, Cardboard) and uses a light sensor to measure how much light passes through.',
+        items: [
+          { id: 'i1', text: 'Type of material of the sheet', answer: 'changed' },
+          { id: 'i2', text: 'Thickness of the sheets & torch brightness', answer: 'unchanged' },
+          { id: 'i3', text: 'Amount of light detected by the sensor', answer: 'measured' }
+        ]
+      }
+    ];
+
+    /* ===========================================================
+       5. QUIZ ARENA QUESTION BANK (36 MOE P3-Style Questions!)
+       =========================================================== */
+    const quizBank = [
+      // --- ANIMALS (8 questions) ---
+      {
+        topic: 'animals',
+        q: 'Which of the following outer coverings is found ONLY on birds?',
+        options: ['Scales', 'Feathers', 'Hair or fur', 'Moist skin'],
+        correct: 1,
+        explanation: 'Only birds have feathers! Even flightless birds like penguins and ostriches have feathers.'
+      },
+      {
+        topic: 'animals',
+        q: 'A whale lives in the ocean and swims with fins, yet scientists classify it as a Mammal. Why?',
+        options: [
+          'It breathes through gills like a fish',
+          'It lays eggs with hard shells',
+          'It breathes through lungs and feeds its young with milk',
+          'It has dry scaly skin'
+        ],
+        correct: 2,
+        explanation: 'Whales and dolphins are mammals because they breathe air through lungs, give birth to live young, and feed their young with milk!'
+      },
+      {
+        topic: 'animals',
+        q: 'Ryan found a creepy-crawly with 8 legs and 2 body parts. Is it an insect?',
+        options: [
+          'Yes, because it is small and crawls',
+          'Yes, because it has a hard outer covering',
+          'No, because insects must have 6 legs and 3 body parts',
+          'No, because insects always have wings'
+        ],
+        correct: 2,
+        explanation: 'Great catch! That\'s a spider! Insects ALWAYS have 6 legs (3 pairs) and 3 body parts (head, thorax, abdomen).'
+      },
+      {
+        topic: 'animals',
+        q: 'Which pair of animals are special mammals that LAY EGGS instead of giving birth to live young?',
+        options: [
+          'Bat and Dolphin',
+          'Platypus and Spiny Anteater',
+          'Penguin and Ostrich',
+          'Guppy and Shark'
+        ],
+        correct: 1,
+        explanation: 'Awesome memory! The Platypus and Spiny Anteater (Echidna) are the two famous egg-laying mammals.'
+      },
+      {
+        topic: 'animals',
+        q: 'Look at Animal X: It lives on land and in water, has moist skin without scales, and lays eggs in water. Which group does Animal X belong to?',
+        options: ['Reptiles', 'Fish', 'Amphibians', 'Mammals'],
+        correct: 2,
+        explanation: 'Moist skin without scales + lives on land and in water = Amphibian (like a frog or salamander)!'
+      },
+      {
+        topic: 'animals',
+        q: 'How is a snake (Reptile) different from a frog (Amphibian)?',
+        options: [
+          'A snake has dry scaly skin, while a frog has moist skin',
+          'A snake breathes with gills, while a frog breathes with lungs',
+          'A snake has 6 legs, while a frog has 4 legs',
+          'A snake feeds its young with milk'
+        ],
+        correct: 0,
+        explanation: 'Remember R-D and A-M! Reptiles have Dry scaly skin, while Amphibians have Moist skin.'
+      },
+      {
+        topic: 'animals',
+        q: 'Which of the following fish gives birth to live young instead of laying eggs?',
+        options: ['Goldfish', 'Guppy', 'Clownfish', 'Salmon'],
+        correct: 1,
+        explanation: 'Guppies (along with mollies, swordtails, and some sharks) are fish that give birth to live young!'
+      },
+      {
+        topic: 'animals',
+        q: 'A penguin cannot fly, while a bat can fly. Which statement is TRUE?',
+        options: [
+          'Both penguin and bat are birds',
+          'The penguin is a fish and the bat is a bird',
+          'The penguin is a bird (has feathers) and the bat is a mammal (has fur)',
+          'Neither of them breathes through lungs'
+        ],
+        correct: 2,
+        explanation: 'Never judge by flying! Penguins have feathers (Birds), and Bats have hair/fur and feed young with milk (Mammals).'
+      },
+
+      // --- MATERIALS (8 questions) ---
+      {
+        topic: 'materials',
+        q: 'Why is clear glass a good material for making the front window of a fish tank?',
+        options: [
+          'It is flexible and absorbs water',
+          'It is waterproof and allows most light to pass through',
+          'It floats on water and is opaque',
+          'It is soft and bends easily'
+        ],
+        correct: 1,
+        explanation: 'Clear glass is waterproof (holds water inside) and transparent (allows most light to pass through so we can see the fish clearly)!'
+      },
+      {
+        topic: 'materials',
+        q: 'Which property makes RUBBER suitable for making a garden water hose?',
+        options: [
+          'It is transparent and floats',
+          'It is flexible and waterproof',
+          'It absorbs water and is stiff',
+          'It is opaque and breaks easily'
+        ],
+        correct: 1,
+        explanation: 'A hose must bend around corners (flexible) and not leak water (waterproof)!'
+      },
+      {
+        topic: 'materials',
+        q: 'What does "Strength" mean in Primary 3 Science?',
+        options: [
+          'How easily a material bends without breaking',
+          'How much light can pass through a material',
+          'How heavy a load a material can support without breaking or tearing',
+          'Whether a material floats or sinks in water'
+        ],
+        correct: 2,
+        explanation: 'Spot on! Strength is the ability of a material to support a heavy load without breaking or tearing.'
+      },
+      {
+        topic: 'materials',
+        q: 'Study the table below. Which material is BEST for making a swimming kickboard?',
+        table: {
+          headers: ['Material', 'Waterproof?', 'Floats on water?'],
+          rows: [
+            ['Material A', 'No', 'Yes'],
+            ['Material B', 'Yes', 'No'],
+            ['Material C', 'Yes', 'Yes'],
+            ['Material D', 'No', 'No']
+          ]
+        },
+        options: ['Material A', 'Material B', 'Material C', 'Material D'],
+        correct: 2,
+        explanation: 'Material C is BOTH waterproof (won\'t get soggy and heavy) AND floats on water to keep the swimmer up!'
+      },
+      {
+        topic: 'materials',
+        q: 'Why is cotton fabric used to make bath towels instead of plastic?',
+        options: [
+          'Cotton fabric is waterproof',
+          'Cotton fabric absorbs water well',
+          'Cotton fabric is transparent',
+          'Cotton fabric sinks in water'
+        ],
+        correct: 1,
+        explanation: 'A bath towel needs to dry our body, so it must be absorbent (absorbs water) and flexible!'
+      },
+      {
+        topic: 'materials',
+        q: 'Frosted glass is used for bathroom windows because it allows SOME light to pass through, so people cannot see clearly inside. Frosted glass is...',
+        options: ['Transparent', 'Translucent', 'Opaque', 'Absorbent'],
+        correct: 1,
+        explanation: 'Translucent materials let SOME light pass through (blurry view), giving privacy while keeping the bathroom bright!'
+      },
+      {
+        topic: 'materials',
+        q: 'A ceramic mug is very hard, but if you drop it on the floor, it shatters into pieces. This shows that ceramic is...',
+        options: ['Flexible', 'Strong', 'Not strong (brittle)', 'Absorbent'],
+        correct: 2,
+        explanation: 'Remember: Hard ≠ Strong! Ceramic breaks easily when dropped, so it is NOT strong.'
+      },
+      {
+        topic: 'materials',
+        q: 'A school bag needs to carry heavy textbooks in the rain without tearing or letting books get wet. Which two properties are MOST important?',
+        options: [
+          'Strong and waterproof',
+          'Transparent and stiff',
+          'Absorbent and floats on water',
+          'Opaque and heavy'
+        ],
+        correct: 0,
+        explanation: 'Strong so it supports heavy books without tearing, and waterproof so rain doesn\'t soak the books!'
+      },
+
+      // --- FAIR TEST RULES (7 questions) ---
+      {
+        topic: 'fairtest',
+        q: 'In a Fair Test experiment, how many variables should you CHANGE at one time?',
+        options: ['Only ONE variable', 'Two variables', 'All the variables', 'Zero variables'],
+        correct: 0,
+        explanation: 'Golden Rule! Always change ONLY ONE variable so you know for sure what caused the result.'
+      },
+      {
+        topic: 'fairtest',
+        q: 'Pauline hangs 1 kg weights on Rulers A, B, and C (made of wood, plastic, and metal) until they break. All rulers have the same length and thickness. What is the CHANGED variable?',
+        options: [
+          'The length of the rulers',
+          'The type of material of the rulers',
+          'The number of 1 kg weights before breaking',
+          'The thickness of the rulers'
+        ],
+        correct: 1,
+        explanation: 'The type of material (wood, plastic, metal) is the ONE thing Pauline changed to compare!'
+      },
+      {
+        topic: 'fairtest',
+        q: 'In Pauline\'s ruler experiment above, what is the MEASURED variable?',
+        options: [
+          'The number of 1 kg weights hung before each ruler breaks',
+          'The length of the rulers',
+          'The type of material of the rulers',
+          'The room temperature'
+        ],
+        correct: 0,
+        explanation: 'The Measured Variable is the result you count or measure at the end — the number of weights!'
+      },
+      {
+        topic: 'fairtest',
+        q: 'Ahmad wants to test if cotton or polyester absorbs more water. He dips a BIG piece of cotton and a TINY piece of polyester into water. Why is his test UNFAIR?',
+        options: [
+          'He used two different types of cloth',
+          'He did not keep the size of the cloths the same',
+          'He used water instead of milk',
+          'He measured the water absorbed'
+        ],
+        correct: 1,
+        explanation: 'The size of the cloths is an Unchanged Variable — both pieces must be the EXACT same size!'
+      },
+      {
+        topic: 'fairtest',
+        q: 'Why do scientists often repeat an experiment 3 times and calculate the average?',
+        options: [
+          'To waste more time in the lab',
+          'To make the experiment fairer',
+          'To make the results more reliable',
+          'To change more variables'
+        ],
+        correct: 2,
+        explanation: 'Awesome P3 Science keyword! Repeating an experiment makes the results MORE RELIABLE.'
+      },
+      {
+        topic: 'fairtest',
+        q: 'Mei wants to find out if warmth helps bread mould grow faster. She puts Bread A in a warm cupboard and Bread B in a cold fridge. Which variables must she keep UNCHANGED?',
+        options: [
+          'The temperature of the two places',
+          'The type of bread and the amount of water sprinkled on each slice',
+          'The number of mould spots counted',
+          'Nothing needs to be kept the same'
+        ],
+        correct: 1,
+        explanation: 'Only the temperature (warm vs cold) should change! The type of bread and amount of water must stay the same.'
+      },
+      {
+        topic: 'fairtest',
+        q: 'What is another name for "Unchanged Variables" in an experiment?',
+        options: [
+          'Variables kept the same',
+          'Mystery variables',
+          'Measured results',
+          'Changed results'
+        ],
+        correct: 0,
+        explanation: 'Unchanged variables are also called "variables kept the same" (or controlled variables)!'
+      },
+
+      // --- LIVING THINGS & 4 GROUPS (6 questions) ---
+      {
+        topic: 'living',
+        q: 'A battery-powered toy dog can bark and walk across the room. Why is it a NON-LIVING thing?',
+        options: [
+          'It is too small',
+          'It does not need air, food, and water, and cannot grow or reproduce',
+          'It does not have feathers',
+          'It moves too slowly'
+        ],
+        correct: 1,
+        explanation: 'Living things must need air, food, and water, grow, respond to changes, reproduce, and die. A toy dog cannot do these!'
+      },
+      {
+        topic: 'living',
+        q: 'Which statement about FUNGI (like mushrooms and bread mould) is TRUE?',
+        options: [
+          'Fungi are green plants that make their own food',
+          'Fungi cannot make their own food and reproduce by spores',
+          'Fungi reproduce by seeds',
+          'Fungi are non-living things'
+        ],
+        correct: 1,
+        explanation: 'Fungi are NOT plants! They cannot make their own food — they feed on living or dead things and reproduce by spores.'
+      },
+      {
+        topic: 'living',
+        q: 'How do non-flowering plants like the Bird\'s Nest Fern reproduce?',
+        options: ['By seeds', 'By flowers', 'By spores', 'By giving birth'],
+        correct: 2,
+        explanation: 'Non-flowering plants (like ferns and mosses) have no flowers or seeds — they reproduce by tiny spores!'
+      },
+      {
+        topic: 'living',
+        q: 'Which of the following is an example of USEFUL bacteria?',
+        options: [
+          'Bacteria that spoil left-out milk',
+          'Bacteria that cause food poisoning',
+          'Bacteria used to make yoghurt and help digest food',
+          'Bacteria that rot wooden furniture'
+        ],
+        correct: 2,
+        explanation: 'Not all bacteria are bad! Helpful bacteria make yummy yoghurt and cheese, and help digest food in our stomach.'
+      },
+      {
+        topic: 'living',
+        q: 'When you touch the leaves of a Mimosa plant, they quickly fold up. Which characteristic of living things does this show?',
+        options: [
+          'Living things can reproduce',
+          'Living things respond to changes around them',
+          'Living things need sunlight',
+          'Living things can fly'
+        ],
+        correct: 1,
+        explanation: 'Folding up when touched shows that plants (living things) respond to changes around them!'
+      },
+      {
+        topic: 'living',
+        q: 'Which group of living things is so tiny that we need a microscope to see them?',
+        options: ['Amphibians', 'Fungi like toadstools', 'Bacteria', 'Ferns'],
+        correct: 2,
+        explanation: 'Bacteria are microscopic living things — you need a microscope to see them!'
+      },
+
+      // --- LIFE CYCLES & MAGNETS (7 questions) ---
+      {
+        topic: 'lifecycles_magnets',
+        q: 'Which group of animals ALL have a 4-stage life cycle (Egg → Larva → Pupa → Adult)?',
+        options: [
+          'Chicken, Frog, Cockroach',
+          'Butterfly, Mosquito, Mealworm Beetle',
+          'Grasshopper, Butterfly, Frog',
+          'Cockroach, Mosquito, Chicken'
+        ],
+        correct: 1,
+        explanation: 'Butterfly, Mosquito, and Mealworm (Darkling Beetle) all have 4 stages: Egg, Larva, Pupa, Adult!'
+      },
+      {
+        topic: 'lifecycles_magnets',
+        q: 'During which stage of a butterfly\'s life cycle does it NOT eat and transform inside a case?',
+        options: ['Egg', 'Larva (Caterpillar)', 'Pupa', 'Adult'],
+        correct: 2,
+        explanation: 'The Larva (caterpillar) eats nonstop, while the Pupa stops eating and transforms into an adult butterfly!'
+      },
+      {
+        topic: 'lifecycles_magnets',
+        q: 'What 3 conditions does a seed need in order to GERMINATE?',
+        options: [
+          'Sunlight, Soil, and Wind',
+          'Water, Air (Oxygen), and Warmth',
+          'Sunlight, Water, and Fertiliser',
+          'Ice, Air, and Darkness'
+        ],
+        correct: 1,
+        explanation: 'Remember W-A-W: Water, Air, and Warmth! Seeds do NOT need sunlight to germinate because they have stored food in their seed leaves.'
+      },
+      {
+        topic: 'lifecycles_magnets',
+        q: 'Which of the following metals will NOT be attracted by a magnet?',
+        options: ['Iron', 'Steel', 'Aluminium', 'Nickel'],
+        correct: 2,
+        explanation: 'Only Iron, Steel, Nickel, and Cobalt are magnetic! Aluminium, Copper, Gold, and Silver are NON-magnetic metals.'
+      },
+      {
+        topic: 'lifecycles_magnets',
+        q: 'How can you be 100% SURE that an unknown metal bar is a magnet and not just a piece of iron?',
+        options: [
+          'See if it attracts a magnet',
+          'See if it REPELS one end of a known magnet',
+          'Check if it is shiny and heavy',
+          'Drop it in water to see if it sinks'
+        ],
+        correct: 1,
+        explanation: 'Golden Magnet Rule: REPULSION is the ONLY sure test for a magnet! Plain iron can only attract, never repel.'
+      },
+      {
+        topic: 'lifecycles_magnets',
+        q: 'Where is the magnetic pull of a bar magnet the STRONGEST?',
+        options: [
+          'Right in the middle',
+          'At its two poles (North and South ends)',
+          'Equally strong everywhere',
+          'Only at the North pole'
+        ],
+        correct: 1,
+        explanation: 'A magnet is always strongest at its two poles (ends) — that\'s why the most paperclips clump at the ends!'
+      },
+      {
+        topic: 'lifecycles_magnets',
+        q: 'How can you make an electromagnet (coiled wire around an iron nail) STRONGER?',
+        options: [
+          'Replace the iron nail with a wooden stick',
+          'Increase the number of coils of wire or add more batteries',
+          'Drop the iron nail on the floor many times',
+          'Use fewer batteries'
+        ],
+        correct: 1,
+        explanation: 'More coils of wire around the iron nail OR more batteries connected in series will make the electromagnet stronger!'
+      }
+    ];
+
+    /* ===========================================================
+       6. NOTES VAULT DATA (Summaries, Tables & Golden Keywords)
+       =========================================================== */
+    const notesVaultData = [
+      {
+        id: 'animals',
+        title: '🦁 Animals — The 6 Main Groups',
+        theme: 'Diversity',
+        color: 'amber',
+        summary: 'Scientists classify animals by their outer coverings, how they breathe, and how they reproduce.',
+        table: {
+          headers: ['Group', 'Outer Covering', 'Breathes With', 'Reproduction', 'Watch Out! (Traps)'],
+          rows: [
+            ['Mammals', 'Hair or fur', 'Lungs', 'Mostly live young + milk', 'Platypus & Spiny Anteater lay eggs! Whales & Bats are mammals!'],
+            ['Birds', 'Feathers', 'Lungs', 'Eggs (hard shell)', 'Penguins & Ostriches can\'t fly, still birds!'],
+            ['Fish', 'Scales', 'Gills', 'Mostly eggs', 'Guppies, Mollies & Sharks give birth to live young!'],
+            ['Reptiles', 'Dry scaly skin', 'Lungs', 'Mostly eggs (leathery)', 'Turtles & Crocodiles are reptiles, not amphibians!'],
+            ['Amphibians', 'Moist skin', 'Lungs + moist skin', 'Jelly-like eggs in water', 'No scales! Lives on land & in water.'],
+            ['Insects', 'Hard outer covering', 'Breathing holes', 'Eggs', '6 legs & 3 body parts. Spiders (8 legs) are NOT insects!']
+          ]
+        },
+        keywords: ['Outer covering', 'Hair or fur', 'Feathers', 'Dry scaly skin', 'Moist skin', '3 body parts & 6 legs', 'Feed young with milk']
+      },
+      {
+        id: 'materials',
+        title: '🧱 Materials & Their 5 Key Properties',
+        theme: 'Diversity',
+        color: 'emerald',
+        summary: 'Always match a material\'s property to the job the object needs to do!',
+        table: {
+          headers: ['Property', 'MOE Definition', 'Good Examples'],
+          rows: [
+            ['Strength', 'Supports a heavy load without breaking or tearing', 'Metal bridges, wooden chairs'],
+            ['Flexibility', 'Bends easily without breaking', 'Rubber hose, fabric clothes, plastic ruler'],
+            ['Waterproof', 'Does NOT absorb water / keeps water out', 'Plastic raincoat, glass tank, rubber boots'],
+            ['Transparency', 'Transparent (most light), Translucent (some), Opaque (no light)', 'Clear glass window, frosted bathroom glass, wooden door'],
+            ['Float / Sink', 'Stays on top of water vs drops to bottom', 'Floats: wood, plastic • Sinks: metal, glass, ceramic']
+          ]
+        },
+        keywords: ['Supports a heavy load without breaking', 'Bends easily without breaking', 'Waterproof / does not absorb water', 'Allows most light to pass through', 'Floats on water']
+      },
+      {
+        id: 'fairtest',
+        title: '🧪 Rules of Fair Test Experiments',
+        theme: 'Science Process Skills',
+        color: 'rose',
+        summary: 'A fair test ensures only ONE factor causes the result we observe.',
+        table: {
+          headers: ['Variable Type', 'Rule', 'Example (Testing Cloth Absorbency)'],
+          rows: [
+            ['🔄 Changed Variable', 'The ONLY ONE thing you change', 'Type of cloth (Cotton vs Nylon)'],
+            ['🔒 Unchanged Variables', 'Everything else kept the SAME', 'Size of cloth, amount of water, soaking time'],
+            ['📏 Measured Variable', 'What you observe or measure at the end', 'Amount of water left in the beaker / absorbed']
+          ]
+        },
+        keywords: ['Ensure a fair test', 'Changed variable', 'Kept the same', 'Measured variable', 'Repeat for reliable results']
+      },
+      {
+        id: 'living',
+        title: '🍄 Living Things, Plants, Fungi & Bacteria',
+        theme: 'Diversity',
+        color: 'sky',
+        summary: 'Living things need air, food, and water, grow, respond to changes, reproduce, and die.',
+        table: {
+          headers: ['Group', 'How They Get Food', 'How They Reproduce', 'Examples'],
+          rows: [
+            ['Flowering Plants', 'Make own food using sunlight', 'Seeds (inside fruits)', 'Hibiscus, Mango tree, Grass'],
+            ['Non-Flowering Plants', 'Make own food using sunlight', 'Spores', 'Bird\'s Nest Fern, Moss'],
+            ['Fungi (NOT Plants!)', 'Feed on living or dead things', 'Spores (yeast: budding)', 'Mushroom, Mould, Yeast'],
+            ['Bacteria (Microscopic)', 'Feed on living or dead things', 'Splitting / dividing', 'Yoghurt bacteria (good), Spoiling bacteria (bad)']
+          ]
+        },
+        keywords: ['Needs air, food, and water', 'Responds to changes', 'Make their own food', 'Reproduce by spores', 'Microscope']
+      },
+      {
+        id: 'lifecycles',
+        title: '🦋 Life Cycles of Animals & Plants',
+        theme: 'Cycles',
+        color: 'purple',
+        summary: 'Life cycles ensure the continuity of living things of their own kind.',
+        table: {
+          headers: ['Cycle Type', 'Stages', 'Examples & Key Notes'],
+          rows: [
+            ['3-Stage Animal', 'Egg → Young → Adult', 'Chicken, Cockroach, Grasshopper (young looks like adult) • Frog (tadpole does NOT look like adult)'],
+            ['4-Stage Animal', 'Egg → Larva → Pupa → Adult', 'Butterfly, Mosquito, Mealworm/Beetle • Larva eats & moults; Pupa does not eat'],
+            ['3-Stage Plant', 'Seed → Young Plant → Adult Plant', 'Needs Water, Air, Warmth to germinate (NO sunlight yet!). Seed leaves feed seedling.']
+          ]
+        },
+        keywords: ['Continuity of their own kind', 'Moulting', 'Larva eats a lot', 'Pupa does not eat', 'Water, air, and warmth to germinate', 'Seed leaves provide food']
+      },
+      {
+        id: 'magnets',
+        title: '🧲 Magnets & Magnetism',
+        theme: 'Interactions',
+        color: 'indigo',
+        summary: 'Magnets exert an invisible push (repel) or pull (attract) force.',
+        table: {
+          headers: ['Concept', 'Key Fact to Remember'],
+          rows: [
+            ['Magnetic Materials', 'ONLY Iron, Steel, Nickel, Cobalt! (Aluminium, Copper, Gold, Silver are NON-magnetic!)'],
+            ['Poles', 'North (N) & South (S). Strongest pull is at the poles. Freely suspended magnet points North-South.'],
+            ['Attract vs Repel', 'Like poles REPEL (N-N, S-S). Unlike poles ATTRACT (N-S). REPULSION is the ONLY sure test for a magnet!'],
+            ['Electromagnet', 'Iron nail + coiled wire + battery. More coils or more batteries = stronger electromagnet!']
+          ]
+        },
+        keywords: ['Iron, steel, nickel, cobalt', 'Strongest at the poles', 'Like poles repel', 'Unlike poles attract', 'Repulsion is the only sure test', 'Stroking in one direction']
+      }
+    ];
+
+    /* ===========================================================
+       7. NAVIGATION & TAB SWITCHING
+       =========================================================== */
+    function switchTab(tabId) {
+      appState.currentTab = tabId;
+      document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+      const activeSec = document.getElementById(`tab-${tabId}`);
+      if (activeSec) {
+        activeSec.classList.remove('hidden');
+        activeSec.classList.remove('animate-pop');
+        void activeSec.offsetWidth;
+        activeSec.classList.add('animate-pop');
+      }
+
+      // Highlight active nav button
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const isCurrent = btn.dataset.tab === tabId;
+        if (isCurrent) {
+          btn.className = 'nav-btn btn-chunky shrink-0 px-4 py-2 rounded-2xl font-display font-bold text-sm sm:text-base flex items-center gap-1.5 border-2 bg-sky-500 text-white border-sky-600 shadow-sm';
+        } else {
+          btn.className = 'nav-btn btn-chunky shrink-0 px-4 py-2 rounded-2xl font-display font-semibold text-sm sm:text-base flex items-center gap-1.5 border-2 bg-slate-50 text-slate-700 border-slate-200 hover:bg-sky-50 hover:border-sky-200';
+        }
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openSlideTopic(topicId) {
+      switchTab('slides');
+      selectSlideTopic(topicId);
+    }
+
+    function openQuizTopic(topicId) {
+      switchTab('quiz');
+      startQuiz(topicId);
+    }
+
+    /* ===========================================================
+       8. SLIDE STUDIO LOGIC
+       =========================================================== */
+    function renderSlideTopicButtons() {
+      const container = document.getElementById('slide-topic-buttons');
+      container.innerHTML = '';
+
+      Object.values(slideDecks).forEach(deck => {
+        const isSelected = appState.currentSlideTopic === deck.id;
+        const isDone = appState.completedDecks.includes(deck.id);
+
+        const btn = document.createElement('button');
+        btn.onclick = () => selectSlideTopic(deck.id);
+        btn.className = `btn-chunky relative text-left p-3.5 rounded-2xl border-2 transition-all flex flex-col justify-between gap-1.5 ${
+          isSelected
+            ? 'bg-sky-500 text-white border-sky-600 shadow-chunky'
+            : 'bg-white text-slate-800 border-slate-200 hover:border-sky-300 hover:bg-sky-50/50'
+        }`;
+
+        btn.innerHTML = `
+          <div class="flex items-center justify-between w-full">
+            <span class="text-2xl">${deck.emoji}</span>
+            ${isDone ? '<span class="text-xs font-extrabold bg-emerald-400 text-slate-900 px-2 py-0.5 rounded-full">✓ Done</span>' :
+              `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${isSelected ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-800'}">${deck.badge}</span>`}
+          </div>
+          <span class="font-display font-bold text-sm leading-tight">${deck.title}</span>
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    function selectSlideTopic(topicId) {
+      appState.currentSlideTopic = topicId;
+      appState.currentSlideIndex = 0;
+      renderSlideTopicButtons();
+      renderCurrentSlide();
+    }
+
+    function changeSlide(delta) {
+      const deck = slideDecks[appState.currentSlideTopic];
+      const nextIdx = appState.currentSlideIndex + delta;
+      if (nextIdx >= 0 && nextIdx < deck.slides.length) {
+        appState.currentSlideIndex = nextIdx;
+        renderCurrentSlide();
+      }
+    }
+
+    function renderCurrentSlide() {
+      const deck = slideDecks[appState.currentSlideTopic];
+      const slide = deck.slides[appState.currentSlideIndex];
+      const total = deck.slides.length;
+      const isLast = appState.currentSlideIndex === total - 1;
+      const isDone = appState.completedDecks.includes(deck.id);
+
+      // Update header & progress bar
+      document.getElementById('slide-deck-badge').textContent = `${deck.emoji} ${deck.title}`;
+      document.getElementById('slide-counter').textContent = `Slide ${appState.currentSlideIndex + 1} of ${total}`;
+      document.getElementById('slide-progress-bar').style.width = `${((appState.currentSlideIndex + 1) / total) * 100}%`;
+
+      // Progress dots
+      const dotsEl = document.getElementById('slide-dots');
+      dotsEl.innerHTML = deck.slides.map((_, idx) => `
+        <button onclick="appState.currentSlideIndex=${idx}; renderCurrentSlide();" aria-label="Go to slide ${idx + 1}"
+          class="h-2.5 rounded-full transition-all ${idx === appState.currentSlideIndex ? 'w-7 bg-sky-500' : 'w-2.5 bg-slate-200 hover:bg-sky-300'}"></button>
+      `).join('');
+
+      // Main slide content
+      const area = document.getElementById('slide-content-area');
+      area.innerHTML = `
+        <div class="animate-pop space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-amber-100 to-sky-100 border-2 border-sky-200 flex items-center justify-center text-4xl sm:text-5xl shrink-0 shadow-sm">
+              ${slide.icon}
+            </div>
+            <div>
+              <h3 class="font-display text-2xl sm:text-3xl font-bold text-slate-800 leading-tight">${slide.title}</h3>
+              <p class="text-slate-600 font-semibold text-sm sm:text-base mt-1">${slide.subtitle}</p>
+            </div>
+          </div>
+
+          <ul class="space-y-3 bg-slate-50/90 border-2 border-slate-100 rounded-2xl p-4 sm:p-6">
+            ${slide.points.map(pt => `
+              <li class="flex items-start gap-3 text-slate-700 text-sm sm:text-base font-semibold leading-relaxed">
+                <span class="mt-1 w-5 h-5 rounded-full bg-sky-500 text-white text-xs font-extrabold flex items-center justify-center shrink-0">✓</span>
+                <span>${pt}</span>
+              </li>
+            `).join('')}
+          </ul>
+
+          <!-- Clickable Reveal Fun Fact / Exam Trap Box -->
+          <div class="rounded-2xl border-2 border-amber-300 bg-amber-50 overflow-hidden transition-all">
+            <button onclick="toggleTrapBox(this)" class="w-full px-5 py-3.5 flex items-center justify-between text-left font-display font-bold text-amber-900 hover:bg-amber-100/70 transition-colors">
+              <span class="flex items-center gap-2 text-base">
+                <span>🔍</span>
+                <span>Tap to Reveal: ${slide.trapTitle}</span>
+              </span>
+              <span class="trap-arrow text-lg transition-transform">👇</span>
+            </button>
+            <div class="trap-body hidden px-5 pb-4 pt-1 text-sm sm:text-base text-amber-950 font-semibold leading-relaxed border-t border-amber-200/70 bg-white/60">
+              ${slide.trapText}
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Nav buttons state
+      document.getElementById('btn-prev-slide').disabled = appState.currentSlideIndex === 0;
+      const nextBtn = document.getElementById('btn-next-slide');
+      const completeBtn = document.getElementById('btn-complete-deck');
+
+      if (isLast) {
+        nextBtn.classList.add('hidden');
+        completeBtn.classList.remove('hidden');
+        completeBtn.textContent = isDone ? '✅ Deck Completed! (Replay Anytime)' : '⭐ Mark Deck Complete (+10 Stars)';
+      } else {
+        nextBtn.classList.remove('hidden');
+        completeBtn.classList.add('hidden');
+      }
+    }
+
+    function toggleTrapBox(btn) {
+      const body = btn.nextElementSibling;
+      const arrow = btn.querySelector('.trap-arrow');
+      const isHidden = body.classList.contains('hidden');
+      if (isHidden) {
+        body.classList.remove('hidden');
+        body.classList.add('animate-pop');
+        arrow.textContent = '✨';
+      } else {
+        body.classList.add('hidden');
+        arrow.textContent = '👇';
+      }
+    }
+
+    function completeCurrentDeck() {
+      const deckId = appState.currentSlideTopic;
+      if (!appState.completedDecks.includes(deckId)) {
+        appState.completedDecks.push(deckId);
+        addStars(10, `Finished ${slideDecks[deckId].title} Slides!`);
+        launchConfetti();
+        renderSlideTopicButtons();
+        renderCurrentSlide();
+      } else {
+        showToast('You already earned stars for this deck — try the Quiz Arena next! 🎯', 'sky');
+      }
+    }
+
+    /* ===========================================================
+       9. EXPERIMENT DETECTIVE LAB LOGIC
+       =========================================================== */
+    function setLabMode(mode) {
+      appState.labMode = mode;
+      const btnFix = document.getElementById('lab-mode-fix');
+      const btnSort = document.getElementById('lab-mode-sort');
+
+      if (mode === 'fix') {
+        btnFix.className = 'btn-chunky px-5 py-3 rounded-2xl font-display font-bold text-sm sm:text-base border-2 bg-rose-500 text-white border-rose-600 shadow-chunky';
+        btnSort.className = 'btn-chunky px-5 py-3 rounded-2xl font-display font-bold text-sm sm:text-base border-2 bg-white text-slate-700 border-slate-200 hover:bg-rose-50';
+        renderLabFixGame();
+      } else {
+        btnSort.className = 'btn-chunky px-5 py-3 rounded-2xl font-display font-bold text-sm sm:text-base border-2 bg-indigo-500 text-white border-indigo-600 shadow-chunky';
+        btnFix.className = 'btn-chunky px-5 py-3 rounded-2xl font-display font-bold text-sm sm:text-base border-2 bg-white text-slate-700 border-slate-200 hover:bg-indigo-50';
+        renderLabSortGame();
+      }
+    }
+
+    // --- Game 1: Spot & Fix the Unfair Test ---
+    function renderLabFixGame() {
+      const container = document.getElementById('lab-game-container');
+      const challenge = labFixChallenges[appState.labFixIndex];
+      const isSolved = Boolean(appState.labFixSolved[challenge.id]);
+
+      const renderSetupCard = (setup, side) => `
+        <div class="rounded-2xl border-2 ${isSolved ? 'border-emerald-300 bg-emerald-50/40' : 'border-slate-200 bg-slate-50/70'} p-4 space-y-3">
+          <div class="flex items-center gap-2.5">
+            <span class="text-3xl">${setup.emoji}</span>
+            <h4 class="font-display font-bold text-lg text-slate-800">${setup.label}</h4>
+          </div>
+          <div class="space-y-2">
+            ${setup.specs.map(spec => {
+              const displayTxt = (isSolved && spec.unfair) ? spec.fixedText : spec.text;
+              let btnStyle = 'bg-white border-slate-200 hover:border-rose-400 hover:bg-rose-50 text-slate-700';
+              if (spec.isChanged) {
+                btnStyle = 'bg-sky-100 border-sky-300 text-sky-900';
+              } else if (isSolved && spec.unfair) {
+                btnStyle = 'bg-emerald-200 border-emerald-400 text-emerald-950 font-extrabold';
+              }
+              return `
+                <button onclick="clickLabFixSpec('${challenge.id}', '${spec.key}', ${Boolean(spec.unfair)}, ${Boolean(spec.isChanged)})"
+                  class="w-full text-left px-3.5 py-2.5 rounded-xl border-2 text-sm font-bold transition-all flex items-center justify-between ${btnStyle}">
+                  <span>${displayTxt}</span>
+                  ${spec.isChanged ? '<span class="text-[11px] bg-sky-200 px-2 py-0.5 rounded-full">Changed</span>' :
+                    (!isSolved ? '<span class="text-xs text-slate-400">Tap if unfair</span>' : '')}
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = `
+        <div class="space-y-5 animate-pop">
+          <!-- Challenge Selector Pills -->
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap gap-2">
+              ${labFixChallenges.map((c, idx) => `
+                <button onclick="appState.labFixIndex=${idx}; renderLabFixGame();"
+                  class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-display font-bold border-2 transition-all ${
+                    idx === appState.labFixIndex
+                      ? 'bg-rose-500 text-white border-rose-600'
+                      : (appState.labFixSolved[c.id] ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-slate-100 text-slate-600 border-slate-200')
+                  }">
+                  Case #${idx + 1} ${appState.labFixSolved[c.id] ? '✅' : ''}
+                </button>
+              `).join('')}
+            </div>
+            <span class="text-xs font-extrabold text-rose-600 bg-rose-50 px-3 py-1 rounded-full">Tap the UNFAIR setting to fix it!</span>
+          </div>
+
+          <!-- Scenario Box -->
+          <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4">
+            <h3 class="font-display text-xl font-bold text-slate-800 mb-1">${challenge.title}</h3>
+            <p class="text-sm sm:text-base text-slate-700 font-semibold">${challenge.aim}</p>
+          </div>
+
+          <!-- Two Setups Side-by-Side -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${renderSetupCard(challenge.setupA, 'A')}
+            ${renderSetupCard(challenge.setupB, 'B')}
+          </div>
+
+          <!-- Feedback Box -->
+          <div id="lab-fix-feedback" class="${isSolved ? '' : 'hidden'} rounded-2xl p-4 border-2 border-emerald-300 bg-emerald-50 text-emerald-950 font-semibold text-sm sm:text-base animate-pop">
+            <div class="font-display font-bold text-lg text-emerald-800 mb-1">🎉 Fair Test Fixed!</div>
+            <p>${challenge.explanation}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function clickLabFixSpec(challengeId, key, isUnfair, isChanged) {
+      if (appState.labFixSolved[challengeId]) return;
+
+      if (isChanged) {
+        showToast('Careful! That\'s the Changed Variable — it is SUPPOSED to be different! 🔄', 'sky');
+        return;
+      }
+      if (isUnfair) {
+        appState.labFixSolved[challengeId] = true;
+        if (!appState.completedLabGames.includes(challengeId)) {
+          appState.completedLabGames.push(challengeId);
+          addStars(8, 'Fixed the Unfair Test!');
+        }
+        launchConfetti();
+        renderLabFixGame();
+      } else {
+        showToast('Look closer! That part is already fair (same in both setups). Check the other numbers! 🔍', 'rose');
+      }
+    }
+
+    // --- Game 2: Variable Sorter Challenge ---
+    function renderLabSortGame() {
+      const container = document.getElementById('lab-game-container');
+      const challenge = labSortChallenges[appState.labSortIndex];
+      if (!appState.labSortAnswers[challenge.id]) {
+        appState.labSortAnswers[challenge.id] = {};
+      }
+      const userAns = appState.labSortAnswers[challenge.id];
+      const allCorrect = challenge.items.every(it => userAns[it.id] === it.answer);
+
+      container.innerHTML = `
+        <div class="space-y-5 animate-pop">
+          <!-- Challenge Selector Pills -->
+          <div class="flex flex-wrap gap-2">
+            ${labSortChallenges.map((c, idx) => {
+              const cAns = appState.labSortAnswers[c.id] || {};
+              const solved = c.items.every(it => cAns[it.id] === it.answer);
+              return `
+                <button onclick="appState.labSortIndex=${idx}; renderLabSortGame();"
+                  class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-display font-bold border-2 transition-all ${
+                    idx === appState.labSortIndex
+                      ? 'bg-indigo-500 text-white border-indigo-600'
+                      : (solved ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-slate-100 text-slate-600 border-slate-200')
+                  }">
+                  Lab #${idx + 1} ${solved ? '✅' : ''}
+                </button>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-4 sm:p-5">
+            <h3 class="font-display text-xl font-bold text-indigo-950 mb-1">${challenge.title}</h3>
+            <p class="text-sm sm:text-base text-slate-700 font-semibold leading-relaxed">${challenge.story}</p>
+          </div>
+
+          <div class="space-y-4">
+            ${challenge.items.map(item => {
+              const chosen = userAns[item.id];
+              const isRight = chosen === item.answer;
+              return `
+                <div class="rounded-2xl border-2 p-4 transition-all ${
+                  isRight ? 'border-emerald-300 bg-emerald-50/60' : 'border-slate-200 bg-slate-50/70'
+                }">
+                  <div class="font-bold text-slate-800 text-sm sm:text-base mb-3 flex items-center justify-between gap-2">
+                    <span>📌 ${item.text}</span>
+                    ${isRight ? '<span class="text-xs font-extrabold bg-emerald-200 text-emerald-900 px-2.5 py-0.5 rounded-full">Correct! ✓</span>' : ''}
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    ${[
+                      { val: 'changed', label: '🔄 Changed Variable', activeCls: 'bg-sky-500 text-white border-sky-600' },
+                      { val: 'unchanged', label: '🔒 Unchanged Variable', activeCls: 'bg-amber-400 text-slate-900 border-amber-500' },
+                      { val: 'measured', label: '📏 Measured Variable', activeCls: 'bg-emerald-500 text-white border-emerald-600' }
+                    ].map(opt => {
+                      const isPicked = chosen === opt.val;
+                      let cls = 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100';
+                      if (isPicked && isRight) cls = opt.activeCls;
+                      else if (isPicked && !isRight) cls = 'bg-rose-100 text-rose-800 border-rose-400';
+                      return `
+                        <button onclick="pickSortAnswer('${challenge.id}', '${item.id}', '${opt.val}', '${item.answer}')"
+                          class="btn-chunky px-3 py-2.5 rounded-xl border-2 font-display font-bold text-xs sm:text-sm transition-all ${cls}">
+                          ${opt.label}
+                        </button>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          ${allCorrect ? `
+            <div class="rounded-2xl p-4 border-2 border-emerald-300 bg-emerald-50 text-emerald-900 font-display font-bold text-base animate-pop">
+              🌟 Amazing! You sorted all 3 variables like a true P3 Scientist!
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function pickSortAnswer(challengeId, itemId, picked, correct) {
+      if (!appState.labSortAnswers[challengeId]) appState.labSortAnswers[challengeId] = {};
+      appState.labSortAnswers[challengeId][itemId] = picked;
+
+      if (picked !== correct) {
+        const hints = {
+          changed: 'Hint: Ask "What is the ONE thing being compared?" 🔄',
+          unchanged: 'Hint: Ask "What must stay the SAME to keep it fair?" 🔒',
+          measured: 'Hint: Ask "What result are we counting or measuring at the end?" 📏'
+        };
+        showToast(`Not quite! ${hints[correct]}`, 'rose');
+      } else {
+        const challenge = labSortChallenges.find(c => c.id === challengeId);
+        const allCorrect = challenge.items.every(it => appState.labSortAnswers[challengeId][it.id] === it.answer);
+        if (allCorrect && !appState.completedLabGames.includes(challengeId)) {
+          appState.completedLabGames.push(challengeId);
+          addStars(8, 'Mastered Variable Sorter!');
+          launchConfetti();
+        }
+      }
+      renderLabSortGame();
+    }
+
+    /* ===========================================================
+       10. QUIZ ARENA LOGIC (Shuffled Topic Quizzes)
+       =========================================================== */
+    const quizTopics = [
+      { id: 'animals', title: 'Animals', emoji: '🦁', color: 'amber' },
+      { id: 'materials', title: 'Materials', emoji: '🧱', color: 'emerald' },
+      { id: 'fairtest', title: 'Fair Test Rules', emoji: '🧪', color: 'rose' },
+      { id: 'living', title: 'Living Things', emoji: '🍄', color: 'sky' },
+      { id: 'lifecycles_magnets', title: 'Cycles & Magnets', emoji: '🧲', color: 'purple' },
+      { id: 'megamix', title: 'Mega Mix!', emoji: '🌈', color: 'indigo' }
+    ];
+
+    function renderQuizTopicButtons() {
+      const container = document.getElementById('quiz-topic-buttons');
+      container.innerHTML = quizTopics.map(t => {
+        const isCurrent = appState.quizTopic === t.id && appState.quizActive;
+        return `
+          <button onclick="startQuiz('${t.id}')"
+            class="btn-chunky p-3.5 rounded-2xl border-2 text-left flex flex-col gap-1 transition-all ${
+              isCurrent
+                ? 'bg-indigo-500 text-white border-indigo-600 shadow-chunky'
+                : 'bg-white text-slate-800 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50'
+            }">
+            <span class="text-2xl">${t.emoji}</span>
+            <span class="font-display font-bold text-sm leading-tight">${t.title}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function startQuiz(topicId) {
+      appState.quizTopic = topicId;
+      appState.quizActive = true;
+      appState.quizIndex = 0;
+      appState.quizScore = 0;
+      appState.quizAnswered = false;
+
+      let pool = topicId === 'megamix'
+        ? shuffleArray(quizBank).slice(0, 8)
+        : shuffleArray(quizBank.filter(q => q.topic === topicId)).slice(0, 5);
+
+      appState.quizQuestions = pool;
+      renderQuizTopicButtons();
+      renderQuizQuestion();
+    }
+
+    function renderQuizQuestion() {
+      const stage = document.getElementById('quiz-stage');
+      if (!appState.quizActive) {
+        stage.innerHTML = `
+          <div class="text-center py-10 space-y-4">
+            <div class="text-6xl animate-float">🎯</div>
+            <h3 class="font-display text-2xl font-bold text-slate-800">Ready to Test Your Brain Power?</h3>
+            <p class="text-slate-600 font-semibold max-w-md mx-auto">Click any topic button above to generate a fresh, randomized 5-question quiz (or 8 questions in Mega Mix)!</p>
+            <button onclick="startQuiz('animals')" class="btn-chunky bg-amber-400 hover:bg-amber-300 text-slate-900 font-display font-bold px-6 py-3 rounded-2xl shadow-chunky">
+              🦁 Quick Start: Animals Quiz
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      // Check if finished
+      if (appState.quizIndex >= appState.quizQuestions.length) {
+        renderQuizSummary();
+        return;
+      }
+
+      const qObj = appState.quizQuestions[appState.quizIndex];
+      const total = appState.quizQuestions.length;
+      const letters = ['A', 'B', 'C', 'D'];
+
+      // Optional P3 exam-style data table inside question
+      const tableHTML = qObj.table ? `
+        <div class="overflow-x-auto my-3 rounded-2xl border-2 border-slate-200">
+          <table class="w-full text-sm text-left">
+            <thead class="bg-sky-50 text-sky-900 font-display">
+              <tr>${qObj.table.headers.map(h => `<th class="px-4 py-2.5 border-b border-slate-200">${h}</th>`).join('')}</tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-slate-100 font-semibold text-slate-700">
+              ${qObj.table.rows.map(r => `<tr>${r.map(c => `<td class="px-4 py-2">${c}</td>`).join('')}</tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : '';
+
+      stage.innerHTML = `
+        <div class="space-y-5 animate-pop">
+          <!-- Top Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-xs sm:text-sm font-extrabold bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">
+              Question ${appState.quizIndex + 1} of ${total}
+            </span>
+            <span class="text-xs sm:text-sm font-extrabold bg-amber-100 text-amber-900 px-3 py-1 rounded-full">
+              Score: ${appState.quizScore} / ${total} ⭐
+            </span>
+          </div>
+
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-indigo-400 to-purple-500 rounded-full transition-all duration-300"
+                 style="width: ${((appState.quizIndex + 1) / total) * 100}%;"></div>
+          </div>
+
+          <!-- Question Text -->
+          <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-5">
+            <h3 class="font-display text-xl sm:text-2xl font-bold text-slate-800 leading-snug">${qObj.q}</h3>
+            ${tableHTML}
+          </div>
+
+          <!-- Answer Options -->
+          <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            ${qObj.options.map((opt, idx) => `
+              <button onclick="selectQuizOption(${idx})" data-idx="${idx}"
+                class="quiz-opt-btn btn-chunky text-left p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50/40 font-semibold text-slate-800 flex items-start gap-3 transition-all">
+                <span class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 font-display font-bold flex items-center justify-center shrink-0">${letters[idx]}</span>
+                <span class="pt-0.5 text-sm sm:text-base">${opt}</span>
+              </button>
+            `).join('')}
+          </div>
+
+          <!-- Feedback Area -->
+          <div id="quiz-feedback" class="hidden rounded-2xl p-4 border-2 animate-pop"></div>
+
+          <!-- Next Button -->
+          <div class="flex justify-end">
+            <button id="btn-next-quiz" onclick="nextQuizQuestion()" class="hidden btn-chunky px-6 py-3 rounded-2xl font-display font-bold text-white bg-indigo-500 hover:bg-indigo-600 shadow-chunky">
+              ${appState.quizIndex + 1 === total ? 'See My Results! 🏆' : 'Next Question ➡️'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function selectQuizOption(chosenIdx) {
+      if (appState.quizAnswered) return;
+      appState.quizAnswered = true;
+
+      const qObj = appState.quizQuestions[appState.quizIndex];
+      const isCorrect = chosenIdx === qObj.correct;
+      if (isCorrect) {
+        appState.quizScore++;
+        addStars(3);
+      }
+
+      // Style all option buttons
+      document.querySelectorAll('.quiz-opt-btn').forEach(btn => {
+        const idx = Number(btn.dataset.idx);
+        btn.disabled = true;
+        if (idx === qObj.correct) {
+          btn.className = 'quiz-opt-btn text-left p-4 rounded-2xl border-2 border-emerald-400 bg-emerald-50 font-bold text-emerald-950 flex items-start gap-3';
+        } else if (idx === chosenIdx && !isCorrect) {
+          btn.className = 'quiz-opt-btn text-left p-4 rounded-2xl border-2 border-rose-400 bg-rose-50 font-bold text-rose-950 flex items-start gap-3';
+        } else {
+          btn.className = 'quiz-opt-btn text-left p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-slate-400 flex items-start gap-3 opacity-70';
+        }
+      });
+
+      const fb = document.getElementById('quiz-feedback');
+      fb.classList.remove('hidden');
+      if (isCorrect) {
+        fb.className = 'rounded-2xl p-4 border-2 border-emerald-300 bg-emerald-50 text-emerald-950 animate-pop';
+        fb.innerHTML = `<div class="font-display font-bold text-lg text-emerald-700 mb-1">🎉 Awesome job! (+3 ⭐)</div><p class="text-sm sm:text-base font-semibold">${qObj.explanation}</p>`;
+      } else {
+        fb.className = 'rounded-2xl p-4 border-2 border-amber-300 bg-amber-50 text-amber-950 animate-pop';
+        fb.innerHTML = `<div class="font-display font-bold text-lg text-amber-800 mb-1">💡 Good try! Here's the science clue:</div><p class="text-sm sm:text-base font-semibold">${qObj.explanation}</p>`;
+      }
+
+      document.getElementById('btn-next-quiz').classList.remove('hidden');
+    }
+
+    function nextQuizQuestion() {
+      appState.quizIndex++;
+      appState.quizAnswered = false;
+      renderQuizQuestion();
+    }
+
+    function renderQuizSummary() {
+      const stage = document.getElementById('quiz-stage');
+      const total = appState.quizQuestions.length;
+      const pct = Math.round((appState.quizScore / total) * 100);
+      const bonus = pct >= 80 ? 10 : 5;
+
+      addStars(bonus, 'Quiz Completion Bonus!');
+      if (pct >= 60) launchConfetti();
+
+      const msg = pct === 100 ? 'PERFECTION! You are a P3 Science Superstar! 🌟' :
+                  pct >= 80   ? 'Fantastic work! You really know your Science! 🚀' :
+                  pct >= 60   ? 'Great effort! Review the Notes Vault and try again! 👍' :
+                                'Nice practice! Check out the Slide Studio to power up! 💪';
+
+      stage.innerHTML = `
+        <div class="text-center py-6 space-y-5 animate-pop">
+          <div class="text-6xl">${pct >= 80 ? '🏆' : '🌟'}</div>
+          <h3 class="font-display text-3xl font-bold text-slate-800">Quiz Complete!</h3>
+          <p class="text-lg font-bold text-indigo-700">${msg}</p>
+
+          <div class="inline-flex items-center gap-6 bg-amber-50 border-2 border-amber-200 rounded-3xl px-8 py-4">
+            <div>
+              <div class="text-xs font-extrabold uppercase text-amber-700">Score</div>
+              <div class="font-display text-3xl font-bold text-slate-800">${appState.quizScore} / ${total}</div>
+            </div>
+            <div class="h-10 w-0.5 bg-amber-200"></div>
+            <div>
+              <div class="text-xs font-extrabold uppercase text-amber-700">Accuracy</div>
+              <div class="font-display text-3xl font-bold text-emerald-600">${pct}%</div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap justify-center gap-3 pt-2">
+            <button onclick="startQuiz('${appState.quizTopic}')" class="btn-chunky bg-indigo-500 hover:bg-indigo-600 text-white font-display font-bold px-6 py-3 rounded-2xl shadow-chunky">
+              🔄 Generate Fresh Quiz
+            </button>
+            <button onclick="switchTab('notes')" class="btn-chunky bg-white hover:bg-slate-50 text-slate-700 border-2 border-slate-200 font-display font-bold px-6 py-3 rounded-2xl">
+              📚 Review Cheat Sheet Notes
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    /* ===========================================================
+       11. NOTES VAULT LOGIC (Filterable & Collapsible Cards)
+       =========================================================== */
+    function renderNotesFilterBar() {
+      const bar = document.getElementById('notes-filter-bar');
+      const filters = [
+        { id: 'all', label: '✨ All Topics' },
+        { id: 'animals', label: '🦁 Animals' },
+        { id: 'materials', label: '🧱 Materials' },
+        { id: 'fairtest', label: '🧪 Fair Test Rules' },
+        { id: 'living', label: '🍄 Living Things' },
+        { id: 'lifecycles', label: '🦋 Life Cycles' },
+        { id: 'magnets', label: '🧲 Magnets' }
+      ];
+      bar.innerHTML = filters.map(f => `
+        <button onclick="appState.notesFilter='${f.id}'; renderNotesFilterBar(); renderNotesVault();"
+          class="btn-chunky px-4 py-2 rounded-2xl font-display font-bold text-xs sm:text-sm border-2 transition-all ${
+            appState.notesFilter === f.id
+              ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm'
+              : 'bg-white text-slate-700 border-slate-200 hover:bg-emerald-50'
+          }">
+          ${f.label}
+        </button>
+      `).join('');
+    }
+
+    function renderNotesVault() {
+      const container = document.getElementById('notes-container');
+      const list = appState.notesFilter === 'all'
+        ? notesVaultData
+        : notesVaultData.filter(n => n.id === appState.notesFilter);
+
+      const borderColors = {
+        amber: 'border-amber-200',
+        emerald: 'border-emerald-200',
+        rose: 'border-rose-200',
+        sky: 'border-sky-200',
+        purple: 'border-purple-200',
+        indigo: 'border-indigo-200'
+      };
+      const headerBg = {
+        amber: 'bg-amber-50/90',
+        emerald: 'bg-emerald-50/90',
+        rose: 'bg-rose-50/90',
+        sky: 'bg-sky-50/90',
+        purple: 'bg-purple-50/90',
+        indigo: 'bg-indigo-50/90'
+      };
+
+      container.innerHTML = list.map(note => `
+        <details open class="group bg-white border-2 ${borderColors[note.color]} rounded-3xl shadow-card overflow-hidden animate-pop">
+          <summary class="cursor-pointer list-none px-6 py-4 ${headerBg[note.color]} flex flex-wrap items-center justify-between gap-2 select-none">
+            <div>
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 block">${note.theme}</span>
+              <h3 class="font-display text-xl sm:text-2xl font-bold text-slate-800">${note.title}</h3>
+            </div>
+            <span class="text-xs font-extrabold bg-white/80 text-slate-600 px-3 py-1 rounded-full border border-slate-200 group-open:hidden">Tap to Expand ➕</span>
+            <span class="text-xs font-extrabold bg-white/80 text-slate-600 px-3 py-1 rounded-full border border-slate-200 hidden group-open:inline">Hide ➖</span>
+          </summary>
+
+          <div class="p-5 sm:p-6 space-y-5">
+            <p class="text-slate-700 font-semibold text-sm sm:text-base">${note.summary}</p>
+
+            <!-- Comparison Table -->
+            <div class="overflow-x-auto rounded-2xl border-2 border-slate-100">
+              <table class="w-full text-left text-xs sm:text-sm">
+                <thead class="bg-slate-100 text-slate-800 font-display">
+                  <tr>
+                    ${note.table.headers.map(h => `<th class="px-4 py-3 font-bold">${h}</th>`).join('')}
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-semibold text-slate-700">
+                  ${note.table.rows.map(row => `
+                    <tr class="hover:bg-slate-50/80">
+                      ${row.map((cell, i) => `<td class="px-4 py-3 ${i === 0 ? 'font-extrabold text-slate-900' : ''}">${cell}</td>`).join('')}
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- MOE Golden Keywords -->
+            <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-4">
+              <div class="font-display font-bold text-sm text-amber-900 mb-2">✨ MOE Golden Science Keywords to Use in Exams:</div>
+              <div class="flex flex-wrap gap-2">
+                ${note.keywords.map(kw => `
+                  <span class="bg-white border border-amber-300 text-amber-950 font-bold text-xs px-3 py-1 rounded-full shadow-sm">${kw}</span>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </details>
+      `).join('');
+    }
+
+    /* ===========================================================
+       12. INITIALIZE APP ON LOAD
+       =========================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      loadProgress();
+      switchTab('home');
+      renderSlideTopicButtons();
+      renderCurrentSlide();
+      setLabMode('fix');
+      renderQuizTopicButtons();
+      renderQuizQuestion();
+      renderNotesFilterBar();
+      renderNotesVault();
+    });
+  </script>
+</body>
+</html>
